@@ -1,0 +1,7 @@
+.vs/
+
+CarServer/.vs/
+CarServer/CarServer/bin/
+CarServer/CarServer/obj/
+CarServer/CarServer/appsettings.json
+CarServer/CarServer/appsettings.Development.json
