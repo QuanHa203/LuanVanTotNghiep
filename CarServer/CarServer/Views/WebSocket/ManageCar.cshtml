@@ -1,0 +1,434 @@
+﻿@model List<CarServer.Models.Car>
+
+@{
+    ViewData["Title"] = "ManageCar";
+}
+
+<style>
+    #car-control-container {
+        position: relative;
+        width: 100%;
+        margin: 20px auto;
+        padding-bottom: 80px;
+        overflow: hidden;
+    }
+
+    .wrapper {
+        display: flex;
+        flex-wrap: nowrap;
+        width: 100%;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .btn-prev {
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+    }
+
+    .btn-next {
+        position: absolute;
+        top: 50%;
+        right: 0;
+        transform: translateY(-50%);
+    }
+
+    .btn-prev, .btn-next {
+        background-color: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        padding: 10px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+
+        .btn-prev:disabled, .btn-next:disabled {
+            background-color: gray;
+            cursor: not-allowed;
+        }
+
+    .car-control-box {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 50%;
+        flex-wrap: wrap;
+        padding: 0 24px;
+    }
+
+        .car-control-box:last-child {
+            border-right: none;
+        }
+
+    .car-temperature-humidity {
+        display: flex;
+        width: 80%;
+        margin-bottom: 24px;
+    }
+
+        .car-temperature-humidity > div {
+            display: flex;
+            align-items: center;
+        }
+
+            .car-temperature-humidity > div > p {
+                margin: 0 0 0 8px;
+                color: var(--secondary-foreground-color);
+                font-weight: bold;
+            }
+
+            .car-temperature-humidity > div:nth-child(1) {
+                margin-right: 24px;
+            }
+
+    .video-frame {
+        width: 80%;
+        aspect-ratio: 1.33; /* Chiều cao = Chiều rộng / 1.33 */
+        border: 1px solid #ccc;
+    }
+
+        .video-frame > img {
+            width: 100%;
+        }
+
+    .car-control-btn-group {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        width: 100%;
+        margin-top: 32px;
+    }
+
+        .car-control-btn-group > div {
+            display: flex;
+            justify-content: center;
+            width: 100%;
+        }
+
+            .car-control-btn-group > div:nth-child(2) {
+                margin: 24px 0;
+            }
+
+                .car-control-btn-group > div:nth-child(2) > button:nth-child(2) {
+                    margin: 0 24px;
+                }
+
+
+    .btn-forward {
+        transform: rotateX(181deg);
+    }
+
+    .btn-turn-left {
+        transform: rotateZ(90deg);
+    }
+
+    .btn-turn-right {
+        transform: rotateZ(-90deg);
+    }
+
+    .btn-brake {
+        border: 1px solid #9b69ea;
+    }
+
+    .btn-forward, .btn-turn-left, .btn-turn-right, .btn-backward {
+        border: 1px solid var(--success-color);
+    }
+
+    .btn-forward, .btn-turn-left, .btn-turn-right, .btn-backward, .btn-brake {
+        background-color: #282640;
+        padding: 18px;
+        transition: 0.08s;
+    }
+
+        .btn-forward:hover, .btn-turn-left:hover, .btn-turn-right:hover, .btn-backward:hover {
+            background-color: #343343;
+            border: 1px solid #19b50f;
+        }
+
+        .btn-forward:active, .btn-turn-left:active, .btn-turn-right:active, .btn-backward:active {
+            background-color: #3c3c41;
+            border: 1px solid #11780a;
+        }
+
+        .btn-forward:hover .arrow-down-icon-color, .btn-turn-left:hover .arrow-down-icon-color, .btn-turn-right:hover .arrow-down-icon-color, .btn-backward:hover .arrow-down-icon-color {
+            background-color: #19b50f;
+        }
+
+        .btn-forward:active .arrow-down-icon-color, .btn-turn-left:active .arrow-down-icon-color, .btn-turn-right:active .arrow-down-icon-color, .btn-backward:active .arrow-down-icon-color {
+            background-color: #11780a;
+        }
+
+        .btn-brake:hover {
+            background-color: #343343;
+            border: 1px solid #714daa;
+        }
+
+        .btn-brake:active {
+            background-color: #343343;
+            border: 1px solid #553a80;
+        }
+
+        .btn-brake:hover .circle-icon-color {
+            background-color: #714daa;
+        }
+
+        .btn-brake:active .circle-icon-color {
+            background-color: #553a80;
+        }
+
+
+    .car-control-command {
+        display: flex;
+        justify-content: space-between;
+        width: 80%;
+        margin-top: 32px;
+    }
+
+        .car-control-command > button {
+            padding: 8px 24px;
+            background: none;
+            transition: 0.08s;
+        }
+
+            .car-control-command > button:nth-child(1) {
+                border: 1px solid var(--warning-color);
+            }
+
+                .car-control-command > button:nth-child(1):hover {
+                    border: 1px solid #d49100;
+                }
+
+                .car-control-command > button:nth-child(1):active {
+                    border: 1px solid #9c6b00;
+                }
+
+            .car-control-command > button:hover .head-line-icon-color {
+                background-color: #d49100;
+            }
+
+            .car-control-command > button:active .head-line-icon-color {
+                background-color: #9c6b00;
+            }
+
+            .car-control-command > button:nth-child(2) {
+                border: 1px solid var(--error-color);
+            }
+
+                .car-control-command > button:nth-child(2) > .dot-icon {
+                    animation: blink 0.8s infinite;
+                }
+
+                .car-control-command > button:nth-child(2):hover {
+                    border: 1px solid #d02f31;
+                }
+
+                .car-control-command > button:nth-child(2):active {
+                    border: 1px solid #af2829;
+                }
+
+            .car-control-command > button:hover .stream-icon-color {
+                background-color: #d02f31;
+            }
+
+            .car-control-command > button:active .stream-icon-color {
+                background-color: #af2829;
+            }
+
+            .car-control-command > button:nth-child(3) {
+                border: 1px solid #9b69ea;
+            }
+
+                .car-control-command > button:nth-child(3):hover {
+                    border: 1px solid #714daa;
+                }
+
+                .car-control-command > button:nth-child(3):active {
+                    border: 1px solid #553a80;
+                }
+
+            .car-control-command > button:hover .screen-shot-icon-color {
+                background-color: #714daa;
+            }
+
+            .car-control-command > button:active .screen-shot-icon-color {
+                background-color: #553a80;
+            }
+
+    .temperature-icon-color {
+        background-color: var(--error-color);
+    }
+
+    .humidity-icon-color {
+        background-color: var(--info-color);
+    }
+
+    .arrow-down-icon-color {
+        background-color: var(--success-color);
+        transition: 0.08s;
+    }
+
+    .circle-icon-color {
+        background-color: #9b69ea;
+        transition: 0.08s;
+    }
+
+    .head-line-icon-color {
+        background-color: var(--warning-color);
+        transition: 0.08s;
+    }
+
+    .stream-icon-color {
+        background-color: var(--error-color);
+        transition: 0.08s;
+    }
+
+    .screen-shot-icon-color {
+        background-color: #9b69ea;
+        transition: 0.08s;
+    }
+
+    @@keyframes blink {
+        0%, 100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: 0.2;
+        }
+    }
+</style>
+
+<style>
+    @@media (min-width: 0px) and (max-width: 768px) {
+        .car-control-box {
+            min-width: 100%;
+            flex-wrap: wrap;
+            padding: 0 8px;
+        }
+
+        .btn-forward, .btn-turn-left, .btn-turn-right, .btn-backward, .btn-brake {
+            padding: 12px;
+        }
+    }
+
+    @@media (min-width: 769px) and (max-width: 992px) {
+        .container {
+            max-width: 962px;
+        }
+
+        .btn-forward, .btn-turn-left, .btn-turn-right, .btn-backward, .btn-brake {
+            padding: 14px;
+        }
+
+        .car-control-command > button {
+            padding: 8px 18px;
+        }
+    }
+</style>
+
+<div id="car-control-container">
+    <div class="wrapper">
+        @for (int i = 0; i < Model.Count; i++)
+            @await Html.PartialAsync("_CarControlBoxPartial", Tuple.Create(i, Model[i]))
+    </div>
+
+    <button class="btn-prev" disabled>&#10094;</button>
+    <button class="btn-next">&#10095;</button>
+</div>
+
+<script>
+    const wrapper = document.querySelector('.wrapper');
+    const prevBtn = document.querySelector('.btn-prev');
+    const nextBtn = document.querySelector('.btn-next');
+
+    let currentIndex = 0;
+    let carControlBoxPerPage = 2;
+
+    function updateButtons() {
+        prevBtn.disabled = currentIndex === 0;
+        nextBtn.disabled = currentIndex >= document.querySelectorAll('.car-control-box').length - carControlBoxPerPage;
+    }
+
+    function updateCarControlBoxPerPage() {
+        if (window.innerWidth <= 768)
+            carControlBoxPerPage = 1;
+        else
+            carControlBoxPerPage = 2;
+            updateButtons();
+    }
+
+    nextBtn.addEventListener('click', () => {
+        const totalBoxes = document.querySelectorAll('.car-control-box').length;
+        const boxWidth = document.getElementById("car-control-container").offsetWidth / carControlBoxPerPage;
+        if (currentIndex < totalBoxes - carControlBoxPerPage) {
+            currentIndex++;
+            wrapper.style.transform = `translateX(-${currentIndex * boxWidth}px)`;
+        }
+        updateButtons();
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (currentIndex > 0) {
+            const boxWidth = document.getElementById("car-control-container").offsetWidth / carControlBoxPerPage;
+            currentIndex--;
+            wrapper.style.transform = `translateX(-${currentIndex * boxWidth}px)`;
+        }
+        updateButtons();
+    });
+
+    window.addEventListener("resize", updateCarControlBoxPerPage);
+
+    updateButtons();
+    updateCarControlBoxPerPage();
+</script>
+
+<script>
+    function sendRecordingStatus(webSocket) {
+        const icon = event.currentTarget.children[0];
+
+        if (icon.classList.contains("stream-icon")) {
+            webSocket.send("recording");
+            icon.classList.remove("stream-icon");
+            icon.classList.add("dot-icon");
+        }
+        else if (icon.classList.contains("dot-icon")) {
+            webSocket.send("stoprecording");
+            icon.classList.remove("dot-icon");
+            icon.classList.add("stream-icon");
+        }
+    }
+
+    function sendLedStatus(webSocket) {
+        const icon = event.currentTarget.children[0];
+
+        if (icon.classList.contains("head-line-on-icon")) {
+            webSocket.send("ledon");
+            icon.classList.remove("head-line-on-icon");
+            icon.classList.add("head-line-off-icon");
+        }
+        else if (icon.classList.contains("head-line-off-icon")) {
+            webSocket.send("ledoff");
+            icon.classList.remove("head-line-off-icon");
+            icon.classList.add("head-line-on-icon");
+        }
+    }
+
+    function sendScreenshot(webSocket) {
+        let btn=event.currentTarget;
+        if (!btn.disabled)
+            webSocket.send(`screenshot`);
+
+        let children = btn.querySelectorAll(`*`);
+        children[0].style.cursor=`not-allowed`;
+        btn.disabled=true;
+        btn.style.cursor=`not-allowed`;
+
+        setTimeout(()=>
+        {
+            btn.disabled = false;
+            btn.style.cursor = `pointer`;
+            children[0].style.cursor=`pointer`;
+        }, 1000);
+    }
+</script>

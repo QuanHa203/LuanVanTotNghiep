@@ -1,0 +1,79 @@
+﻿.arrow-down-icon {
+    width: 12px;
+    height: 12px;
+    background-color: black;
+    mask-image: url('../svgs/arrow_down.svg');
+    -webkit-mask-image: url('../svgs/arrow_down.svg');
+}
+
+.circle-icon {
+    width: 12px;
+    height: 12px;
+    background-color: black;
+    mask-image: url('../svgs/circle.svg');
+    -webkit-mask-image: url('../svgs/circle.svg');
+}
+
+.dot-icon {
+    width: 12px;
+    height: 12px;
+    background-color: black;
+    mask-image: url('../svgs/dot.svg');
+    -webkit-mask-image: url('../svgs/dot.svg');
+}
+
+.head-line-off-icon {
+    width: 12px;
+    height: 12px;
+    background-color: black;
+    mask-image: url('../svgs/head_line_off.svg');
+    -webkit-mask-image: url('../svgs/head_line_off.svg');
+}
+
+.head-line-on-icon {
+    width: 12px;
+    height: 12px;
+    background-color: black;
+    mask-image: url('../svgs/head_line_on.svg');
+    -webkit-mask-image: url('../svgs/head_line_on.svg');
+}
+
+.humidity-icon {
+    width: 12px;
+    height: 12px;
+    background-color: black;
+    mask-image: url('../svgs/humidity.svg');
+    -webkit-mask-image: url('../svgs/humidity.svg');
+}
+
+.rec-icon {
+    width: 12px;
+    height: 12px;
+    background-color: black;
+    mask-image: url('../svgs/rec.svg');
+    -webkit-mask-image: url('../svgs/rec.svg');
+}
+
+.screen-shot-icon {
+    width: 12px;
+    height: 12px;
+    background-color: black;
+    mask-image: url("../svgs/screenshot.svg");
+    -webkit-mask-image: url("../svgs/screenshot.svg");
+}
+
+.stream-icon {
+    width: 12px;
+    height: 12px;
+    background-color: black;
+    mask-image: url('../svgs/stream.svg');
+    -webkit-mask-image: url('../svgs/stream.svg');
+}
+
+.temperature-icon {
+    width: 12px;
+    height: 12px;
+    background-color: black;
+    mask-image: url('../svgs/temperature.svg');
+    -webkit-mask-image: url('../svgs/temperature.svg');
+}

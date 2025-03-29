@@ -1,22 +1,22 @@
 ﻿@model Guid
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "CreateCar";
 }
 
-<h1>Create</h1>
+<h1 class="fg-main">Tạo xe mới</h1>
 
-<h4>Car</h4>
 <hr />
-<div class="row">
+<div class="row fg-main">
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
-                <label class="form-label">Id</label>
-                <input name="Id" />
+                <label class="form-label">Guid</label>
+                <input class="form-control bg-main fg-second" name="Id" />
+                <span class="text-danger mt-1">@ViewData.ModelState["IdError"]?.Errors[0].ErrorMessage</span>
             </div>
-            <div class="form-group">
+            <div class="form-group mt-2">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>

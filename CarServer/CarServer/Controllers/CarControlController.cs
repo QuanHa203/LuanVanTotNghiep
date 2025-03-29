@@ -13,12 +13,14 @@ public class CarControlController : Controller
     private readonly ILogger<CarControlController> _logger;
     private readonly CarServerDbContext _context;
     private readonly PendingWebSocketRequests _pendingWebSocketRequests;
-    
-    public CarControlController(ILogger<CarControlController> logger, CarServerDbContext context, PendingWebSocketRequests pendingWebSocketRequests)
+    private readonly WebSocketHandler _webSocketHandler;
+
+    public CarControlController(ILogger<CarControlController> logger, CarServerDbContext context, PendingWebSocketRequests pendingWebSocketRequests, WebSocketHandler webSocketHandler)
     {
         _logger = logger;
         _context = context;
         _pendingWebSocketRequests = pendingWebSocketRequests;
+        _webSocketHandler = webSocketHandler;
     }
 
     [HttpGet]
@@ -33,7 +35,7 @@ public class CarControlController : Controller
         _context.Update(esp32Control);
         _context.SaveChanges();
 
-        // If need to Esp32Control connect to WebSocket or not
+        // Require Esp32Control connect to WebSocket or not
         if (_pendingWebSocketRequests.GetEsp32ControlRequest(guid))
             return StatusCode((int)HttpStatusCode.UpgradeRequired);
         else
@@ -41,33 +43,18 @@ public class CarControlController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> Control(Guid guid)
+    public async Task Control(Guid guid)
     {
-        if (HttpContext.WebSockets.IsWebSocketRequest)
+        if (!HttpContext.WebSockets.IsWebSocketRequest)
         {
-            WebSocket webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-
-            try
-            {
-                byte[] buffer = new byte[1024];
-                while (webSocket.State == WebSocketState.Open)
-                {
-                    string data = "turnleft";
-                    await webSocket.SendAsync(new ArraySegment<byte>(Encoding.UTF8.GetBytes(data)), WebSocketMessageType.Text, true, CancellationToken.None);
-
-                    //var rs = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                    //string message = Encoding.UTF8.GetString(buffer, 0, rs.Count);
-                    //_logger.LogInformation(message);
-                    await Task.Delay(1000);
-                }
-            }
-            catch (Exception ex)
-            {
-                
-                _logger.LogInformation("Error: " + ex.Message);
-            }
+            HttpContext.Response.StatusCode = 400;
+            return;
         }
 
-        return Ok();
+        using (WebSocket webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync())
+        {
+            WebSocketEsp32Control webSocketEsp32Control = new WebSocketEsp32Control(webSocket);
+            await _webSocketHandler.AddWebSocketEsp32Control(guid, webSocketEsp32Control);
+        }
     }
 }

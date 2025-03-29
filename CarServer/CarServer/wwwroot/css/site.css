@@ -1,3 +1,14 @@
+:root {
+    --primary-foreground-color: #99acc2;
+    --secondary-foreground-color: #ccd7e3;
+    --primary-background-color: #1c2340;
+    --secondary-background-color: #151934;
+    --warning-color: #ffae00;
+    --error-color: #f03537;
+    --success-color: #1eff0f;
+    --info-color: #3663fd
+}
+
 html {
   font-size: 14px;
 }
@@ -19,4 +30,20 @@ html {
 
 body {
   margin-bottom: 60px;
+}
+
+.bg-main {
+    background-color: var(--primary-background-color) !important;
+}
+
+.bg-second {
+    background-color: var(--secondary-background-color) !important;
+}
+
+.fg-main {
+    color: var(--primary-foreground-color) !important;
+}
+
+.fg-second {
+    color: var(--secondary-foreground-color) !important;
 }

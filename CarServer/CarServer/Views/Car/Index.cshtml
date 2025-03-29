@@ -1,41 +1,46 @@
 ﻿@model IEnumerable<CarServer.Models.Car>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Car status";
 }
 
-<h1>Index</h1>
+<h1 class="fg-main">Thông tin trạng thái xe</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create">Tạo xe mới</a>
 </p>
-<table class="table">
+<table class="table fg-second">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Esp32Control)
+                Guid car
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Esp32Camera)
+                Eps32 Control
+            </th>
+            <th>
+                Eps32 Camera
             </th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Esp32Control.Id)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Esp32Camera.Id)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @(item.Esp32Control.IsOnline == true ? "Đang online" : $"Lần online gần nhất: {item.Esp32Control.LastSeen.ToString("dd/MM/yyyy HH:mm:ss")}")
+                </td>
+                <td>
+                    @(item.Esp32Camera.IsOnline == true ? "Đang online" : $"Lần online gần nhất: {item.Esp32Camera.LastSeen.ToString("dd/MM/yyyy HH:mm:ss")}")
+                </td>
+                <td>
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>

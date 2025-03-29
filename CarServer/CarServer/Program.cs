@@ -18,6 +18,7 @@ builder.Services.AddDbContext<CarServerDbContext>(options =>
 });
 
 builder.Services.AddSingleton<PendingWebSocketRequests>();
+builder.Services.AddSingleton<WebSocketHandler>();
 
 var app = builder.Build();
 
@@ -40,6 +41,6 @@ app.UseWebSockets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=User}/{action=ManageCar}");
+    pattern: "{controller=Car}/{action=Index}");
 
 app.Run();
