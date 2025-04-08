@@ -1,0 +1,100 @@
+﻿@{
+    ViewData["Title"] = "DataStatistics";
+    var images = ViewData["DictionaryImage"] as Dictionary<string, List<string>>;
+    var videos = ViewData["DictionaryVideo"] as Dictionary<string, List<string>>;
+}
+
+<link rel="stylesheet" href="~/css/data-statistics.css" />
+
+
+<div>
+    <h1 class="fg-main">Thống kê dữ liệu</h1>
+    <nav id="nav-btn-group">
+        <button id="btn-image-nav" class="nav-btn nav-btn-active">Hình ảnh</button>
+        <button id="btn-video-nav" class="nav-btn">Video</button>
+    </nav>
+
+    <div id="media-container">
+        @if (images == null)
+        {
+            <h2>Không có hình ảnh nào</h2>
+            return;
+        }
+
+        <div id="image-container">
+            @foreach (var key in images.Keys)
+            {
+                <div class="media-box">
+                    <h3 class="media-title">@key</h3>
+                    @await Html.PartialAsync("_ImageBoxPartial", images[key])
+                </div>
+            }
+        </div>
+
+
+        @if (videos == null)
+        {
+            <h2>Không có video nào</h2>
+            return;
+        }
+
+        <div id="video-container">
+            @foreach (var key in videos.Keys)
+            {
+                <div class="media-box">
+                    <h3 class="media-title">@key</h3>
+                    @await Html.PartialAsync("_VideoBoxPartial", videos[key])
+                </div>
+            }
+        </div>
+    </div>
+
+    <div id="overlay-media-section">
+        <div id="overlay-media-container">
+            <div class="overlay-media-header">
+                <div id="overlay-media-title">456178253_471506469671661_2781666950760530985_n.png</div>
+                <button id="overlay-media-close-btn">&times;</button>
+            </div>
+
+            <div class="overlay-media-box">
+                <div>
+                    <video id="media-video-src"></video>
+                    <img id="media-image-src" />
+
+                    <div id="overlay-media-video-controls">
+                        <div class="progress-container">
+                            <div class="progress-bar"></div>
+                        </div>
+                        <div class="controls-row">
+                            <div class="left-controls">
+                                <button class="control-btn" title="Phát/Tạm dừng"><i class="fas fa-play"></i></button>                                
+                                <span class="time-display">00:00 / 00:00</span>
+                            </div>
+                            <div class="right-controls">
+                                <div class="volume-container">
+                                    <button class="control-btn" title="Âm lượng"><i
+                                            class="fas fa-volume-up"></i></button>
+                                    <input type="range" class="volume-slider" min="0" max="1" step="0.1" value="1">
+                                </div>                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="overlay-media-toolbar">
+                <button class="tool-btn">
+                    <div class="download-icon"></div>
+                    Tải xuống
+                </button>
+
+                <button id="" class="tool-btn">
+                    <div class="trash-icon"></div>
+                    Xóa
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/data-statistics.js"></script>

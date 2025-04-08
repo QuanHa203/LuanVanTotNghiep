@@ -7,8 +7,6 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>	  
   </PropertyGroup>
 
-  
-
   <ItemGroup>
     <Folder Include="Databases\" />
     <Folder Include="Helpers\" />

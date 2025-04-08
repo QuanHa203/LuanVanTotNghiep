@@ -1,15 +1,16 @@
 using CarServer.BackgroundServices;
 using CarServer.Databases;
+using CarServer.Middleware;
 using CarServer.Services.WebSockets;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.WebHost.UseKestrel(options => options.ListenAnyIP(1234));
-builder.Services.AddControllersWithViews();
-
-builder.Services.AddHostedService<OnlineStatusChecker>();
 
 builder.Services.AddDbContext<CarServerDbContext>(options =>
 {
@@ -17,8 +18,34 @@ builder.Services.AddDbContext<CarServerDbContext>(options =>
     options.UseSqlServer(connectionString);
 });
 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin", policy =>
+    {
+        policy.WithOrigins("http://localhost:1234", "http://192.168.1.100:1234")
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
+                {
+                    options.Cookie.Name = "CarServerAuth";
+                    options.LoginPath = "/Account/Login";
+                    options.LogoutPath = "/Account/Logout";
+                });
+
+builder.Services.AddAuthorization();
+builder.Services.AddSession();
+builder.Services.AddControllersWithViews();
+
+builder.Services.AddHostedService<OnlineStatusChecker>();
+
 builder.Services.AddSingleton<PendingWebSocketRequests>();
 builder.Services.AddSingleton<WebSocketHandler>();
+builder.Services.AddTransient<ProtectedMediasFolderMiddleware>();
 
 var app = builder.Build();
 
@@ -31,9 +58,19 @@ if (!app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
+    RequestPath = ""
+});
+
+app.UseSession();
+app.UseMiddleware<ProtectedMediasFolderMiddleware>();
+
 
 app.UseRouting();
+app.UseCors("AllowSpecificOrigin");
 
 app.UseAuthorization();
 app.UseWebSockets();

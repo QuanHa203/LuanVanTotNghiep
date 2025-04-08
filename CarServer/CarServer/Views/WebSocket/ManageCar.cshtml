@@ -4,334 +4,10 @@
     ViewData["Title"] = "ManageCar";
 }
 
-<style>
-    #car-control-container {
-        position: relative;
-        width: 100%;
-        margin: 20px auto;
-        padding-bottom: 80px;
-        overflow: hidden;
-    }
-
-    .wrapper {
-        display: flex;
-        flex-wrap: nowrap;
-        width: 100%;
-        transition: transform 0.3s ease-in-out;
-    }
-
-    .btn-prev {
-        position: absolute;
-        top: 50%;
-        left: 0;
-        transform: translateY(-50%);
-    }
-
-    .btn-next {
-        position: absolute;
-        top: 50%;
-        right: 0;
-        transform: translateY(-50%);
-    }
-
-    .btn-prev, .btn-next {
-        background-color: rgba(0, 0, 0, 0.5);
-        color: white;
-        border: none;
-        padding: 10px;
-        cursor: pointer;
-        font-size: 16px;
-    }
-
-        .btn-prev:disabled, .btn-next:disabled {
-            background-color: gray;
-            cursor: not-allowed;
-        }
-
-    .car-control-box {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 50%;
-        flex-wrap: wrap;
-        padding: 0 24px;
-    }
-
-        .car-control-box:last-child {
-            border-right: none;
-        }
-
-    .car-temperature-humidity {
-        display: flex;
-        width: 80%;
-        margin-bottom: 24px;
-    }
-
-        .car-temperature-humidity > div {
-            display: flex;
-            align-items: center;
-        }
-
-            .car-temperature-humidity > div > p {
-                margin: 0 0 0 8px;
-                color: var(--secondary-foreground-color);
-                font-weight: bold;
-            }
-
-            .car-temperature-humidity > div:nth-child(1) {
-                margin-right: 24px;
-            }
-
-    .video-frame {
-        width: 80%;
-        aspect-ratio: 1.33; /* Chiều cao = Chiều rộng / 1.33 */
-        border: 1px solid #ccc;
-    }
-
-        .video-frame > img {
-            width: 100%;
-        }
-
-    .car-control-btn-group {
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        width: 100%;
-        margin-top: 32px;
-    }
-
-        .car-control-btn-group > div {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
-
-            .car-control-btn-group > div:nth-child(2) {
-                margin: 24px 0;
-            }
-
-                .car-control-btn-group > div:nth-child(2) > button:nth-child(2) {
-                    margin: 0 24px;
-                }
-
-
-    .btn-forward {
-        transform: rotateX(181deg);
-    }
-
-    .btn-turn-left {
-        transform: rotateZ(90deg);
-    }
-
-    .btn-turn-right {
-        transform: rotateZ(-90deg);
-    }
-
-    .btn-brake {
-        border: 1px solid #9b69ea;
-    }
-
-    .btn-forward, .btn-turn-left, .btn-turn-right, .btn-backward {
-        border: 1px solid var(--success-color);
-    }
-
-    .btn-forward, .btn-turn-left, .btn-turn-right, .btn-backward, .btn-brake {
-        background-color: #282640;
-        padding: 18px;
-        transition: 0.08s;
-    }
-
-        .btn-forward:hover, .btn-turn-left:hover, .btn-turn-right:hover, .btn-backward:hover {
-            background-color: #343343;
-            border: 1px solid #19b50f;
-        }
-
-        .btn-forward:active, .btn-turn-left:active, .btn-turn-right:active, .btn-backward:active {
-            background-color: #3c3c41;
-            border: 1px solid #11780a;
-        }
-
-        .btn-forward:hover .arrow-down-icon-color, .btn-turn-left:hover .arrow-down-icon-color, .btn-turn-right:hover .arrow-down-icon-color, .btn-backward:hover .arrow-down-icon-color {
-            background-color: #19b50f;
-        }
-
-        .btn-forward:active .arrow-down-icon-color, .btn-turn-left:active .arrow-down-icon-color, .btn-turn-right:active .arrow-down-icon-color, .btn-backward:active .arrow-down-icon-color {
-            background-color: #11780a;
-        }
-
-        .btn-brake:hover {
-            background-color: #343343;
-            border: 1px solid #714daa;
-        }
-
-        .btn-brake:active {
-            background-color: #343343;
-            border: 1px solid #553a80;
-        }
-
-        .btn-brake:hover .circle-icon-color {
-            background-color: #714daa;
-        }
-
-        .btn-brake:active .circle-icon-color {
-            background-color: #553a80;
-        }
-
-
-    .car-control-command {
-        display: flex;
-        justify-content: space-between;
-        width: 80%;
-        margin-top: 32px;
-    }
-
-        .car-control-command > button {
-            padding: 8px 24px;
-            background: none;
-            transition: 0.08s;
-        }
-
-            .car-control-command > button:nth-child(1) {
-                border: 1px solid var(--warning-color);
-            }
-
-                .car-control-command > button:nth-child(1):hover {
-                    border: 1px solid #d49100;
-                }
-
-                .car-control-command > button:nth-child(1):active {
-                    border: 1px solid #9c6b00;
-                }
-
-            .car-control-command > button:hover .head-line-icon-color {
-                background-color: #d49100;
-            }
-
-            .car-control-command > button:active .head-line-icon-color {
-                background-color: #9c6b00;
-            }
-
-            .car-control-command > button:nth-child(2) {
-                border: 1px solid var(--error-color);
-            }
-
-                .car-control-command > button:nth-child(2) > .dot-icon {
-                    animation: blink 0.8s infinite;
-                }
-
-                .car-control-command > button:nth-child(2):hover {
-                    border: 1px solid #d02f31;
-                }
-
-                .car-control-command > button:nth-child(2):active {
-                    border: 1px solid #af2829;
-                }
-
-            .car-control-command > button:hover .stream-icon-color {
-                background-color: #d02f31;
-            }
-
-            .car-control-command > button:active .stream-icon-color {
-                background-color: #af2829;
-            }
-
-            .car-control-command > button:nth-child(3) {
-                border: 1px solid #9b69ea;
-            }
-
-                .car-control-command > button:nth-child(3):hover {
-                    border: 1px solid #714daa;
-                }
-
-                .car-control-command > button:nth-child(3):active {
-                    border: 1px solid #553a80;
-                }
-
-            .car-control-command > button:hover .screen-shot-icon-color {
-                background-color: #714daa;
-            }
-
-            .car-control-command > button:active .screen-shot-icon-color {
-                background-color: #553a80;
-            }
-
-    .temperature-icon-color {
-        background-color: var(--error-color);
-    }
-
-    .humidity-icon-color {
-        background-color: var(--info-color);
-    }
-
-    .arrow-down-icon-color {
-        background-color: var(--success-color);
-        transition: 0.08s;
-    }
-
-    .circle-icon-color {
-        background-color: #9b69ea;
-        transition: 0.08s;
-    }
-
-    .head-line-icon-color {
-        background-color: var(--warning-color);
-        transition: 0.08s;
-    }
-
-    .stream-icon-color {
-        background-color: var(--error-color);
-        transition: 0.08s;
-    }
-
-    .screen-shot-icon-color {
-        background-color: #9b69ea;
-        transition: 0.08s;
-    }
-
-    @@keyframes blink {
-        0%, 100% {
-            opacity: 1;
-        }
-
-        50% {
-            opacity: 0.2;
-        }
-    }
-</style>
-
-<style>
-    @@media (min-width: 0px) and (max-width: 768px) {
-        .car-control-box {
-            min-width: 100%;
-            flex-wrap: wrap;
-            padding: 0 8px;
-        }
-
-        .btn-forward, .btn-turn-left, .btn-turn-right, .btn-backward, .btn-brake {
-            padding: 12px;
-        }
-    }
-
-    @@media (min-width: 769px) and (max-width: 992px) {
-        .container {
-            max-width: 962px;
-        }
-
-        .btn-forward, .btn-turn-left, .btn-turn-right, .btn-backward, .btn-brake {
-            padding: 14px;
-        }
-
-        .car-control-command > button {
-            padding: 8px 18px;
-        }
-    }
-</style>
+<link rel="stylesheet" href="~/css/web-socket.css" />
 
 <div id="car-control-container">
-    <div class="wrapper">
-        @for (int i = 0; i < Model.Count; i++)
-            @await Html.PartialAsync("_CarControlBoxPartial", Tuple.Create(i, Model[i]))
-    </div>
+    <div class="wrapper"></div>
 
     <button class="btn-prev" disabled>&#10094;</button>
     <button class="btn-next">&#10095;</button>
@@ -346,6 +22,14 @@
     let carControlBoxPerPage = 2;
 
     function updateButtons() {
+        if (wrapper.children.length == 0) {
+            prevBtn.style.visibility = "hidden"
+            nextBtn.style.visibility = "hidden";
+        }
+        else {
+            prevBtn.style.visibility = "visible"
+            nextBtn.style.visibility = "visible";
+        }
         prevBtn.disabled = currentIndex === 0;
         nextBtn.disabled = currentIndex >= document.querySelectorAll('.car-control-box').length - carControlBoxPerPage;
     }
@@ -355,12 +39,12 @@
             carControlBoxPerPage = 1;
         else
             carControlBoxPerPage = 2;
-            updateButtons();
+        updateButtons();
     }
 
     nextBtn.addEventListener('click', () => {
         const totalBoxes = document.querySelectorAll('.car-control-box').length;
-        const boxWidth = document.getElementById("car-control-container").offsetWidth / carControlBoxPerPage;
+        const boxWidth = (document.getElementById("car-control-container").offsetWidth / carControlBoxPerPage);
         if (currentIndex < totalBoxes - carControlBoxPerPage) {
             currentIndex++;
             wrapper.style.transform = `translateX(-${currentIndex * boxWidth}px)`;
@@ -370,7 +54,7 @@
 
     prevBtn.addEventListener('click', () => {
         if (currentIndex > 0) {
-            const boxWidth = document.getElementById("car-control-container").offsetWidth / carControlBoxPerPage;
+            const boxWidth = (document.getElementById("car-control-container").offsetWidth / carControlBoxPerPage);
             currentIndex--;
             wrapper.style.transform = `translateX(-${currentIndex * boxWidth}px)`;
         }
@@ -384,51 +68,311 @@
 </script>
 
 <script>
-    function sendRecordingStatus(webSocket) {
-        const icon = event.currentTarget.children[0];
+    const mainWebSocket = new WebSocket(`ws://192.168.1.100:1234/WebSocket/MainClientWebSocket`)
+    mainWebSocket.binaryType = "arraybuffer"
+    mainWebSocket.onopen = () => {
+        console.log("Connected to WebSocket");
+    };
 
-        if (icon.classList.contains("stream-icon")) {
-            webSocket.send("recording");
-            icon.classList.remove("stream-icon");
-            icon.classList.add("dot-icon");
+    mainWebSocket.onmessage = (event) => {
+        if (typeof event.data === "string") {
+            if (event.data.startsWith("RequireConnectToWebSocket:")) {
+                let guidCar = event.data.split(": ")[1];
+                openCarWebSocket(guidCar);
+            }
+            else if (event.data.startsWith("Esp32ControlClosed:")) {
+                let guid = event.data.split(": ")[1];
+                alert(`Esp32ControlClosed: ${guid}`);
+            }
+            else if (event.data.startsWith("Esp32CameraClosed:")) {
+                let guid = event.data.split(": ")[1];
+                alert(`Esp32CameraClosed: ${guid}`);
+            }
         }
-        else if (icon.classList.contains("dot-icon")) {
-            webSocket.send("stoprecording");
-            icon.classList.remove("dot-icon");
-            icon.classList.add("stream-icon");
-        }
-    }
+    };
 
-    function sendLedStatus(webSocket) {
-        const icon = event.currentTarget.children[0];
+    function openCarWebSocket(guidCar) {
+        const url = `ws://192.168.1.100:1234/WebSocket/ClientWebSocket?guidCar=${guidCar}`;
+        let ws = new WebSocket(url);
+        const html = `
+        <div class="car-control-box" id="car-control-box-${guidCar}">
+            <div>
+            <div class="car-temperature-humidity">
+                <div>
+                    <div class="temperature-icon temperature-icon-color p-3"></div>
+                    <p id="temperature-${guidCar}"></p>
+                </div>
 
-        if (icon.classList.contains("head-line-on-icon")) {
-            webSocket.send("ledon");
-            icon.classList.remove("head-line-on-icon");
-            icon.classList.add("head-line-off-icon");
-        }
-        else if (icon.classList.contains("head-line-off-icon")) {
-            webSocket.send("ledoff");
-            icon.classList.remove("head-line-off-icon");
-            icon.classList.add("head-line-on-icon");
-        }
-    }
+                <div>
+                    <div class="humidity-icon humidity-icon-color p-3"></div>
+                    <p id="humidity-${guidCar}"></p>
+                </div>
+            </div>
 
-    function sendScreenshot(webSocket) {
-        let btn=event.currentTarget;
-        if (!btn.disabled)
-            webSocket.send(`screenshot`);
+            <div class="video-frame">
+                <img id="video-${guidCar}" />
+                <div class="video-frame-overlay" id="video-frame-overlay-${guidCar}">
+                    <p>Esp32 Camera mất kết nối</p>
+                    <div>
+                        <button id="btn-reconnect-to-esp32-camera-${guidCar}">Kết nối lại?</button>
+                        <button id="btn-close-reconnect-to-esp32-camera-${guidCar}">Đóng</button>
+                    </div>
+                </div>
+            </div>
 
-        let children = btn.querySelectorAll(`*`);
-        children[0].style.cursor=`not-allowed`;
-        btn.disabled=true;
-        btn.style.cursor=`not-allowed`;
+            <div class="car-control-btn-group">
+                <div>
+                    <button class="btn-forward" id="btn-forward-${guidCar}">
+                        <div class="arrow-down-icon arrow-down-icon-color p-4"></div>
+                    </button>
+                </div>
+                <div>
+                    <button class="btn-turn-left" id="btn-turn-left-${guidCar}">
+                        <div class="arrow-down-icon arrow-down-icon-color p-4"></div>
+                    </button>
 
-        setTimeout(()=>
-        {
-            btn.disabled = false;
-            btn.style.cursor = `pointer`;
-            children[0].style.cursor=`pointer`;
-        }, 1000);
+                    <button class="btn-brake" id="btn-brake-${guidCar}">
+                        <div class="circle-icon circle-icon-color p-4"></div>
+                    </button>
+
+                    <button class="btn-turn-right" id="btn-turn-right-${guidCar}">
+                        <div class="arrow-down-icon arrow-down-icon-color p-4"></div>
+                    </button>
+                </div>
+                <div>
+                    <button class="btn-backward" id="btn-backward-${guidCar}">
+                        <div class="arrow-down-icon arrow-down-icon-color p-4"></div>
+                    </button>
+                </div>
+
+                <div class="car-control-btn-group-overlay" id="car-control-btn-group-overlay-${guidCar}">
+                    <p>Esp32 Control mất kết nối</p>
+                    <div>
+                        <button id="btn-reconnect-to-esp32-control-${guidCar}">Kết nối lại?</button>
+                        <button id="btn-close-reconnect-to-esp32-control-${guidCar}">Đóng</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="car-control-command">
+                <button id="btn-led-${guidCar}">
+                    <div class="head-line-on-icon head-line-icon-color p-3" />
+                </button>
+
+                <button id="btn-recording-${guidCar}">
+                    <div class="stream-icon stream-icon-color p-3"></div>
+                </button>
+
+                <button id="btn-screenshot-${guidCar}">
+                    <div class="screen-shot-icon screen-shot-icon-color p-3"></div>
+                </button>
+            </div>
+        </div>
+    </div>`;
+
+        wrapper.insertAdjacentHTML("beforeend", html);
+        updateButtons();
+
+        const carControlBoxElement = document.getElementById(`car-control-box-${guidCar}`);
+        const temperature = document.getElementById(`temperature-${guidCar}`)
+        const humidity = document.getElementById(`humidity-${guidCar}`)
+        const video = document.getElementById(`video-${guidCar}`);
+
+        const btnForward = document.getElementById(`btn-forward-${guidCar}`);
+        const btnBackward = document.getElementById(`btn-backward-${guidCar}`);
+        const btnTurnLeft = document.getElementById(`btn-turn-left-${guidCar}`);
+        const btnTurnRight = document.getElementById(`btn-turn-right-${guidCar}`);
+        const btnBrake = document.getElementById(`btn-brake-${guidCar}`);
+
+        const btnLed = document.getElementById(`btn-led-${guidCar}`);
+        const btnRecording = document.getElementById(`btn-recording-${guidCar}`);
+        const btnScreenshot = document.getElementById(`btn-screenshot-${guidCar}`);
+
+        const overlayControl = document.getElementById(`car-control-btn-group-overlay-${guidCar}`);
+        const overlayCamera = document.getElementById(`video-frame-overlay-${guidCar}`);
+
+        const btnReconnectToEsp32Camera = document.getElementById(`btn-reconnect-to-esp32-camera-${guidCar}`);
+        const btnCloseReconnectToEsp32Camera = document.getElementById(`btn-close-reconnect-to-esp32-camera-${guidCar}`);
+
+        const btnReconnectToEsp32Control = document.getElementById(`btn-reconnect-to-esp32-control-${guidCar}`);
+        const btnCloseReconnectToEsp32Control = document.getElementById(`btn-close-reconnect-to-esp32-control-${guidCar}`);
+
+        let lastPingTimeOfEsp32Control = performance.now();
+        let lastPingTimeOfEsp32Camera = performance.now();
+        let hashCode;
+
+        ws.onopen = () => {
+            const checkPingFromEsp32ControlInterval = setInterval(() => {
+                if (performance.now() - lastPingTimeOfEsp32Control >= 5000) {
+                    overlayControl.style.display = "flex";
+                }
+            }, 3000)
+
+            const checkPingFromEsp32CameralInterval = setInterval(() => {
+                if (performance.now() - lastPingTimeOfEsp32Camera >= 5000) {
+                    overlayCamera.style.display = "flex";
+                }
+            }, 3000)
+
+            const pingInterval = setInterval(() => {
+                if (ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING || ws.readyState === WebSocket.CONNECTING)
+                    clearInterval(pingInterval);
+
+                else {
+                    let pingText = "ping";
+                    ws.send(pingText);
+                }
+            }, 3000);
+        };
+
+        ws.onclose = () => {
+            console.log(`WebSocket for Car ${guidCar} close.`);
+            carControlBoxElement.remove();
+            updateButtons();
+        };
+
+        ws.onmessage = async (event) => {
+            if (typeof event.data === "string") {
+                try {
+                    const jsonData = JSON.parse(event.data);
+                    temperature.innerText = `${jsonData.temperature}℃`;
+                    humidity.innerText = `${jsonData.humidity}%`;
+                }
+                catch {
+                    if (event.data === "ScreenshotTaken") {
+                        alert("screenshot success!");
+                    }
+                    else if (event.data === "Esp32ControlClosed") {
+                        alert("Esp32Control connection lost!");
+                    }
+                    else if (event.data === "Esp32CameraClosed") {
+                        alert("Esp32Camera connection lost!");
+                    }
+                    else if (event.data === "PingFromEsp32Control") {
+                        lastPingTimeOfEsp32Control = performance.now();
+                    }
+
+                    else if (event.data.startsWith("HashCode:")) {
+                        hashCode = event.data.split(": ")[1];
+                    }
+                }
+            }
+            else if (event.data instanceof Blob) {
+                const buffer = await event.data.slice(0, 4).arrayBuffer(); // Read first 4 bytes
+                const uint8 = new Uint8Array(buffer);
+
+                // JPEG
+                if (uint8[0] === 0xFF && uint8[1] === 0xD8 && uint8[2] === 0xFF) {
+                    const imgUrl = URL.createObjectURL(event.data);
+                    video.src = imgUrl;
+                }
+                else {
+                    const text = await event.data.text();
+                    if (text === "PingFromEsp32Camera") {
+                        lastPingTimeOfEsp32Camera = performance.now();
+                    }
+                }
+            }
+        };
+
+        btnForward.addEventListener("touchstart", (e) => ws.send("forward"));
+        btnForward.addEventListener("touchend", (e) => ws.send("brake"));
+        btnForward.addEventListener("mousedown", (e) => ws.send("forward"));
+        btnForward.addEventListener("mouseup", (e) => ws.send("brake"));
+
+        btnBackward.addEventListener("touchstart", (e) => ws.send("backward"));
+        btnBackward.addEventListener("touchend", (e) => ws.send("brake"));
+        btnBackward.addEventListener("mousedown", (e) => ws.send("backward"));
+        btnBackward.addEventListener("mouseup", (e) => ws.send("brake"));
+
+        btnTurnLeft.addEventListener("touchstart", (e) => ws.send("turnleft"));
+        btnTurnLeft.addEventListener("touchend", (e) => ws.send("brake"));
+        btnTurnLeft.addEventListener("mousedown", (e) => ws.send("turnleft"));
+        btnTurnLeft.addEventListener("mouseup", (e) => ws.send("brake"));
+
+        btnTurnRight.addEventListener("touchstart", (e) => ws.send("turnright"));
+        btnTurnRight.addEventListener("touchend", (e) => ws.send("brake"));
+        btnTurnRight.addEventListener("mousedown", (e) => ws.send("turnright"));
+        btnTurnRight.addEventListener("mouseup", (e) => ws.send("brake"));
+
+        btnBrake.addEventListener("click", (e) => ws.send("brake"));
+
+        btnLed.addEventListener("click", (e) => {
+            const icon = e.currentTarget.children[0];
+
+            if (icon.classList.contains("head-line-on-icon")) {
+                ws.send("ledon");
+                icon.classList.remove("head-line-on-icon");
+                icon.classList.add("head-line-off-icon");
+            }
+            else if (icon.classList.contains("head-line-off-icon")) {
+                ws.send("ledoff");
+                icon.classList.remove("head-line-off-icon");
+                icon.classList.add("head-line-on-icon");
+            }
+        });
+
+        btnRecording.addEventListener("click", (e) => {
+            const icon = e.currentTarget.children[0];
+
+            if (icon.classList.contains("stream-icon")) {
+                ws.send("recording");
+                icon.classList.remove("stream-icon");
+                icon.classList.add("dot-icon");
+            }
+            else if (icon.classList.contains("dot-icon")) {
+                ws.send("stoprecording");
+                icon.classList.remove("dot-icon");
+                icon.classList.add("stream-icon");
+            }
+        });
+
+        btnScreenshot.addEventListener("click", (e) => {
+            let btn = e.currentTarget;
+            if (!btn.disabled)
+                ws.send(`screenshot`);
+
+            let children = btn.querySelectorAll(`*`);
+            children[0].style.cursor = `not-allowed`;
+            btn.disabled = true;
+            btn.style.cursor = `not-allowed`;
+
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.style.cursor = `pointer`;
+                children[0].style.cursor = `pointer`;
+            }, 1000);
+        });
+
+        btnReconnectToEsp32Control.addEventListener("click", async (e) => {
+            fetch(`http://192.168.1.100:1234/WebSocket/ReconnectToEsp32Control?guidCar=${guidCar}`,
+                {
+                    method: 'GET'
+                });
+
+            mainWebSocket.send(`Reconnect: ${hashCode} - ${guidCar}`);
+            overlayControl.style.display = "none";
+            lastPingTimeOfEsp32Control = performance.now();
+        });
+
+        btnReconnectToEsp32Camera.addEventListener("click", async (e) => {
+            fetch(`http://192.168.1.100:1234/WebSocket/ReconnectToEsp32Camera?guidCar=${guidCar}`,
+                {
+                    method: 'GET'
+                });
+            mainWebSocket.send(`Reconnect: ${hashCode} - ${guidCar}`);
+            overlayCamera.style.display = "none";
+            lastPingTimeOfEsp32Camera = performance.now();
+        });
+
+        btnCloseReconnectToEsp32Control.addEventListener("click", (e) => {
+            overlayControl.style.display = "none";
+            lastPingTimeOfEsp32Control = performance.now();
+        });
+
+        btnCloseReconnectToEsp32Camera.addEventListener("click", (e) => {
+            overlayCamera.style.display = "none";
+            lastPingTimeOfEsp32Camera = performance.now();
+        });
     }
 </script>

@@ -1,0 +1,37 @@
+﻿@model CarServer.Controllers.AccountController.AppUserLogin
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+<link rel="stylesheet" href="~/css/account.css"/>
+
+<div id="account-section">
+    <div class="account-container">
+        <div class="account-image">
+            <img src="https://storage.googleapis.com/a1aa/image/1GvAUuCks1BLW88tkicOPm9W9AQqz46EshUY4yAdeIQ.jpg" alt="account Image" />
+        </div>
+
+        <div class="account-form-container">
+            <h2 class="account-title">ĐĂNG NHẬP</h2>
+            <form class="account-form" asp-action="Login" method="post">
+                <div class="form-group">
+                    <label for="userNameOrEmail">User name hoặc email</label>
+                    <input type="text" asp-for="UserNameOrEmail" id="userNameOrEmail" class="form-control" />
+                    <span class="fg-red" asp-validation-for="UserNameOrEmail"></span>
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" asp-for="Password" id="password" class="form-control" />
+                        <i class="toggle-password"></i>
+                    </div>
+                    <span class="fg-red" asp-validation-for="Password"></span>
+                </div>
+                <div class="form-options">
+                    <a asp-controller="Account" asp-action="Register" class="forgot-password">Chưa có tài khoản? Đăng ký</a>
+                    <a asp-controller="Account" asp-action="ForgotPassword" class="forgot-password">Quên mật khẩu?</a>
+                </div>
+                <button type="submit" class="account-button">ĐĂNG NHẬP</button>
+            </form>
+        </div>
+    </div>
+</div>

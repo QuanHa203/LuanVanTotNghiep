@@ -1,127 +1,104 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
-using CarServer.Databases;
+﻿using CarServer.Databases;
 using CarServer.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
-namespace CarServer.Controllers
+namespace CarServer.Controllers;
+
+public class CarController : Controller
 {
-    public class CarController : Controller
+    private readonly CarServerDbContext _context;
+
+    public CarController(CarServerDbContext context)
     {
-        private readonly CarServerDbContext _context;
+        _context = context;
+    }
 
-        public CarController(CarServerDbContext context)
+    public async Task<IActionResult> Index()
+    {
+        var carServerDbContext = _context.Cars.Include(c => c.Esp32Camera).Include(c => c.Esp32Control);
+        return View(await carServerDbContext.ToListAsync());
+    }
+
+
+    public IActionResult Create()
+        => View();
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(Guid id)
+    {            
+        if (ModelState.IsValid)
         {
-            _context = context;
-        }
-
-        public async Task<IActionResult> Index()
-        {
-            var carServerDbContext = _context.Cars.Include(c => c.Esp32Camera).Include(c => c.Esp32Control);
-            return View(await carServerDbContext.ToListAsync());
-        }
-
-
-        public IActionResult Create()
-            => View();
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Guid id)
-        {            
-            if (ModelState.IsValid)
+            if (id == Guid.Empty)
             {
-                if (id == Guid.Empty)
-                {
-                    ModelState.AddModelError("IdError", "Id này không hợp lệ");
-                    return View(id);
-                }
-
-                if (CarExists(id))
-                {
-                    ModelState.AddModelError("IdError", "Id đã tồn tại");
-                    return View(id);
-                }
-
-                Esp32Control esp32Control = new Esp32Control
-                {
-                    Id = id,
-                    IsOnline = false,
-                    LastSeen = DateTime.Now
-                };
-                Esp32Camera esp32Camera = new Esp32Camera
-                {
-                    Id = id,
-                    IsOnline = false,
-                    LastSeen = DateTime.Now
-                };
-
-                Car car = new Car()
-                {
-                    Id = id
-                };
-
-                _context.Add(esp32Control);
-                _context.Add(esp32Camera);
-                _context.Add(car);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            else
-            {
-                if (id == Guid.Empty)
-                {
-                    ModelState.AddModelError("IdError", "Vui lòng điền Id");
-                    return View(id);
-                }
-
-                ModelState.AddModelError("IdError", "Id phải đúng định dạng");
+                ModelState.AddModelError("IdError", "Id này không hợp lệ");
                 return View(id);
             }
-        }
 
-        public async Task<IActionResult> Delete(Guid? id)
-        {
-            if (id == null)
+            if (CarExists(id))
             {
-                return NotFound();
+                ModelState.AddModelError("IdError", "Id đã tồn tại");
+                return View(id);
             }
 
-            var car = await _context.Cars
-                .Include(c => c.Esp32Camera)
-                .Include(c => c.Esp32Control)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (car == null)
+            Esp32Control esp32Control = new Esp32Control
             {
-                return NotFound();
-            }
-
-            return View(car);
-        }
-
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(Guid id)
-        {
-            var esp32Control = await _context.Esp32Controls.FindAsync(id);
-            var esp32Camera = await _context.Esp32Cameras.FindAsync(id);
-            if (esp32Camera != null && esp32Control != null)
+                Id = id,
+                IsOnline = false,
+                LastSeen = DateTime.Now
+            };
+            Esp32Camera esp32Camera = new Esp32Camera
             {
-                _context.Esp32Controls.Remove(esp32Control);
-                _context.Esp32Cameras.Remove(esp32Camera);
-            }
+                Id = id,
+                IsOnline = false,
+                LastSeen = DateTime.Now
+            };
 
+            Car car = new Car()
+            {
+                Id = id
+            };
+
+            _context.Add(esp32Control);
+            _context.Add(esp32Camera);
+            _context.Add(car);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
-        private bool CarExists(Guid id)
+        else
         {
-            return _context.Cars.Any(e => e.Id == id);
+            if (id == Guid.Empty)
+            {
+                ModelState.AddModelError("IdError", "Vui lòng điền Id");
+                return View(id);
+            }
+
+            ModelState.AddModelError("IdError", "Id phải đúng định dạng");
+            return View(id);
         }
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        if (id == Guid.Empty)
+            return BadRequest();
+
+        var esp32Control = await _context.Esp32Controls.FindAsync(id);
+        var esp32Camera = await _context.Esp32Cameras.FindAsync(id);
+        if (esp32Camera != null && esp32Control != null)
+        {
+            _context.Esp32Controls.Remove(esp32Control);
+            _context.Esp32Cameras.Remove(esp32Camera);
+        }
+
+        await _context.SaveChangesAsync();
+        return Ok();
+    }
+
+    private bool CarExists(Guid id)
+    {
+        return _context.Cars.Any(e => e.Id == id);
     }
 }

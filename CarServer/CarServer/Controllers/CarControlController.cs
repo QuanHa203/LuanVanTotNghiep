@@ -53,8 +53,7 @@ public class CarControlController : Controller
 
         using (WebSocket webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync())
         {
-            WebSocketEsp32Control webSocketEsp32Control = new WebSocketEsp32Control(webSocket);
-            await _webSocketHandler.AddWebSocketEsp32Control(guid, webSocketEsp32Control);
+            using Esp32ControlWebSocket webSocketEsp32Control = new Esp32ControlWebSocket(webSocket, _webSocketHandler, guid);
         }
     }
 }

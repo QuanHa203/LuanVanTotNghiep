@@ -1,5 +1,6 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,25 +8,66 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/svg-icon.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/CarServer.styles.css" asp-append-version="true" />
+    @* <link rel="stylesheet" href="/CarServer.styles.css?v=j9S7vKjPekVR3P9Z7SzF7BB8Tff5ioQXWPy58iHAzZI" /> *@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 </head>
+
 <body class="bg-main">
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm border-bottom box-shadow mb-3 bg-main fg-second">
             <div class="container-fluid">
-                <a class="navbar-brand fg-second" asp-area="" asp-controller="Home" asp-action="Index">CarServer</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand fg-main" asp-area="" asp-controller="Home" asp-action="Index">CarServer</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse"
+                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link fg-second" asp-area="" asp-controller="Car" asp-action="Index">Trạng thái xe</a>
+                            <a class="nav-a" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link fg-second" asp-area="" asp-controller="User" asp-action="ManageCar">Điều khiển xe</a>
+                            <a class="nav-a" asp-area="" asp-controller="Car" asp-action="Index">
+                                Quản lý các thiết bị
+                            </a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-a" asp-area="" asp-controller="WebSocket" asp-action="ManageCar">
+                                Trung tâm điều khiển
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-a" asp-area="" asp-controller="DataStatistics" asp-action="Index">
+                                Thống kê dữ liệu
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-a" asp-area="" asp-controller="WebSocket" asp-action="ManageCar">
+                                Phân tích dữ liệu
+                            </a>
+                        </li>
+                    </ul>
+                    <ul class="navbar-nav">
+                        @if (Context.User.Identity == null || Context.User.Identity.IsAuthenticated == false)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-a" asp-area="" asp-controller="Account" asp-action="Login">Đăng nhập</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-a" asp-area="" asp-controller="Account" asp-action="Register">Đăng ký</a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-a" href="#">Xin chào @Context.User.Identity.Name</a>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-controller="Account" asp-action="Logout" method="post">
+                                    <button class="nav-a btn-no-bg btn-no-border" type="submit">Đăng xuất</button>
+                                </form>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -47,4 +89,5 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
+
 </html>

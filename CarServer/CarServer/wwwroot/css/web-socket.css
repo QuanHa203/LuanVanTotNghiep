@@ -1,0 +1,401 @@
+#car-control-container {
+    position: relative;
+    width: 100%;
+    margin: 20px auto;
+    overflow: hidden;
+}
+
+.wrapper {
+    display: flex;
+    flex-wrap: nowrap;
+    width: 100%;
+    transition: transform 0.3s ease-in-out;
+}
+
+.btn-prev {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+}
+
+.btn-next {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+}
+
+.btn-prev,
+.btn-next {
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn-prev:disabled,
+.btn-next:disabled {
+    background-color: gray;
+    cursor: not-allowed;
+}
+
+.car-control-box {
+    margin: 0 auto;
+    min-width: 50%;
+}
+
+.car-control-box > div {
+    display: flex;
+    flex-direction: column;
+    padding: 24px; 
+    margin: 0 24px;   
+    border: 1px solid#000;
+    border-radius: 16px;
+}
+
+.car-temperature-humidity {
+    display: flex;
+    width: 100%;
+    margin: 0 auto;
+    padding: 12px;
+}
+
+.car-temperature-humidity>div {
+    display: flex;
+    align-items: center;
+}
+
+.car-temperature-humidity>div>p {
+    margin: 0 0 0 8px;
+    color: var(--secondary-foreground-color);
+    font-weight: bold;
+}
+
+.car-temperature-humidity>div:nth-child(1) {
+    margin-right: 24px;
+}
+
+.video-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1.33;
+    /* Chiều cao = Chiều rộng / 1.33 */
+    margin: 0 auto;
+    border: 1px solid#000;
+    border-radius: 8px;
+}
+
+.video-frame>img {
+    width: 100%;
+    border-radius: 8px;
+}
+
+.video-frame-overlay {
+    border-radius: 8px;   
+}
+
+.video-frame-overlay,
+.car-control-btn-group-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.video-frame-overlay>p,
+.car-control-btn-group-overlay>p {
+    font-size: 20px;
+    font-weight: bold;
+    color: #ddd;
+    text-align: center;
+}
+
+.video-frame-overlay>div,
+.car-control-btn-group-overlay>div {}
+
+.video-frame-overlay>div button,
+.car-control-btn-group-overlay button {
+    padding: 12px 18px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+.video-frame-overlay>div button:nth-child(1),
+.car-control-btn-group-overlay button:nth-child(1) {
+    border: none;
+    color: #fff;
+    margin-right: 32px;
+    background-color: var(--blue-color);
+}
+
+.video-frame-overlay>div button:nth-child(2),
+.car-control-btn-group-overlay button:nth-child(2) {
+    border: none;
+    color: #c8c3bc;
+    background-color: #1e2729;
+}
+
+.car-control-btn-group {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    width: 100%;
+    margin: 0 auto;
+    padding: 32px 0;
+    position: relative;
+}
+
+.car-control-btn-group>div:nth-child(1),
+.car-control-btn-group>div:nth-child(2),
+.car-control-btn-group>div:nth-child(3) {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.car-control-btn-group>div:nth-child(2) {
+    margin: 24px 0;
+}
+
+.car-control-btn-group>div:nth-child(2)>button:nth-child(2) {
+    margin: 0 24px;
+}
+
+.btn-forward {
+    transform: rotateX(181deg);
+}
+
+
+.btn-turn-left {
+    transform: rotateZ(90deg);
+}
+
+.btn-turn-right {
+    transform: rotateZ(-90deg);
+}
+
+.btn-brake {
+    background-color: var(--red-color);
+}
+
+.btn-forward,
+.btn-backward,
+.btn-turn-left,
+.btn-turn-right {
+    background-color: #2c3e50;
+}
+
+.btn-forward,
+.btn-turn-left,
+.btn-turn-right,
+.btn-backward,
+.btn-brake {
+    padding: 18px;
+    transition: 0.08s;
+    border: none;
+    border-radius: 12px;
+}
+
+.btn-forward:hover,
+.btn-turn-left:hover,
+.btn-turn-right:hover,
+.btn-backward:hover {}
+
+.btn-forward:active,
+.btn-turn-left:active,
+.btn-turn-right:active,
+.btn-backward:active {}
+
+.btn-forward:hover .arrow-down-icon-color,
+.btn-turn-left:hover .arrow-down-icon-color,
+.btn-turn-right:hover .arrow-down-icon-color,
+.btn-backward:hover .arrow-down-icon-color {}
+
+.btn-forward:active .arrow-down-icon-color,
+.btn-turn-left:active .arrow-down-icon-color,
+.btn-turn-right:active .arrow-down-icon-color,
+.btn-backward:active .arrow-down-icon-color {}
+
+.btn-brake:hover {}
+
+.btn-brake:active {}
+
+.btn-brake:hover .circle-icon-color {}
+
+.btn-brake:active .circle-icon-color {}
+
+.car-control-command {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;    
+    margin: 0 auto;
+}
+
+.car-control-command>button {
+    padding: 8px 24px;
+    transition: 0.08s;
+    border: none;
+    border-radius: 6px;
+    background-color: #2c3e50;
+}
+
+.car-control-command>button:nth-child(1) {
+    
+}
+
+.car-control-command>button:nth-child(1):hover {}
+
+.car-control-command>button:nth-child(1):active {}
+
+.car-control-command>button:hover .head-line-icon-color {}
+
+.car-control-command>button:active .head-line-icon-color {}
+
+.car-control-command>button:nth-child(2) {
+    
+}
+
+.car-control-command>button:nth-child(2)>.dot-icon {
+    animation: blink 0.8s infinite;
+}
+
+.car-control-command>button:nth-child(2):hover {}
+
+.car-control-command>button:nth-child(2):active {}
+
+.car-control-command>button:hover .stream-icon-color {}
+
+.car-control-command>button:active .stream-icon-color {}
+
+.car-control-command>button:nth-child(3) {
+    
+}
+
+.car-control-command>button:nth-child(3):hover {}
+
+.car-control-command>button:nth-child(3):active {}
+
+.car-control-command>button:hover .screen-shot-icon-color {}
+
+.car-control-command>button:active .screen-shot-icon-color {
+    background-color: #553a80;
+}
+
+.temperature-icon-color {
+    background-color: var(--red-color);
+}
+
+.humidity-icon-color {
+    background-color: var(--blue-color);
+}
+
+.arrow-down-icon-color,
+.circle-icon-color {
+    background-color: var(--light-color);
+    transition: 0.08s;
+}
+
+.head-line-icon-color {
+    background-color: var(--orange-color);
+    transition: 0.08s;
+}
+
+.stream-icon-color {
+    background-color: var(--red-color);
+    transition: 0.08s;
+}
+
+.screen-shot-icon-color {
+    background-color: var(--purple-color);
+    transition: 0.08s;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.2;
+    }
+}
+
+@media (min-width: 0px) and (max-width: 768px) {
+    .car-control-box {
+        min-width: 100%;
+        flex-wrap: wrap;
+        padding: 0 8px;
+    }
+
+    .car-temperature-humidity {
+        width: 80%;
+    }
+
+    .video-frame {
+        width: 80%;
+    }
+
+    .car-control-command {
+        width: 80%;
+        padding: 12px;
+    }
+
+    .car-control-btn-group {
+        width: 80%;
+    }
+
+    .btn-forward,
+    .btn-turn-left,
+    .btn-turn-right,
+    .btn-backward,
+    .btn-brake {
+        padding: 12px;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 992px) {
+    .container {
+        max-width: 962px;
+    }
+
+    .car-temperature-humidity {
+        width: 90%;
+    }
+
+    .video-frame {
+        width: 90%;
+    }
+
+    .car-control-command {
+        width: 90%;
+    }
+
+    .car-control-btn-group {
+        width: 90%;
+    }
+
+    .btn-forward,
+    .btn-turn-left,
+    .btn-turn-right,
+    .btn-backward,
+    .btn-brake {
+        padding: 14px;
+    }
+
+    .car-control-command>button {
+        padding: 8px 18px;
+    }
+}

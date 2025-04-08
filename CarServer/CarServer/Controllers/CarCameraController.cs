@@ -49,8 +49,7 @@ public class CarCameraController : Controller
 
         using (WebSocket webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync())
         {
-            WebSocketEsp32Camera webSocketEsp32Camera = new WebSocketEsp32Camera(webSocket);
-            await _webSocketHandler.AddWebSocketEsp32Camera(guid, webSocketEsp32Camera);
+            using Esp32CameraWebSocket webSocketEsp32Camera = new Esp32CameraWebSocket(webSocket, _webSocketHandler, guid);
         }
     }
 }

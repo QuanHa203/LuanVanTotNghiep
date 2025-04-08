@@ -6,7 +6,7 @@ public class ImageCapturer
     {
         try
         {
-            string imgPath = Path.Combine(AppContext.BaseDirectory, "Medias", guidCar.ToString(), "Screenshots", DateTime.Now.ToString("yyyy-MM-dd"));
+            string imgPath = Path.Combine(AppContext.BaseDirectory, "wwwroot" ,"Medias", guidCar.ToString(), "Screenshots", DateTime.Now.ToString("yyyy-MM-dd"));
             if (!Directory.Exists(imgPath))
             {
                 Directory.CreateDirectory(imgPath);

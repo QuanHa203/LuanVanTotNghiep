@@ -22,6 +22,14 @@
     -webkit-mask-image: url('../svgs/dot.svg');
 }
 
+.download-icon {
+    width: 12px;
+    height: 12px;
+    background-color: black;
+    mask-image: url('../svgs/download.svg');
+    -webkit-mask-image: url('../svgs/download.svg');
+}
+
 .head-line-off-icon {
     width: 12px;
     height: 12px;
@@ -44,6 +52,14 @@
     background-color: black;
     mask-image: url('../svgs/humidity.svg');
     -webkit-mask-image: url('../svgs/humidity.svg');
+}
+
+.play-circle-icon {
+    width: 12px;
+    height: 12px;
+    background-color: black;
+    mask-image: url('../svgs/play_circle.svg');
+    -webkit-mask-image: url('../svgs/play_circle.svg');
 }
 
 .rec-icon {
@@ -76,4 +92,12 @@
     background-color: black;
     mask-image: url('../svgs/temperature.svg');
     -webkit-mask-image: url('../svgs/temperature.svg');
+}
+
+.trash-icon {
+    width: 12px;
+    height: 12px;
+    background-color: black;
+    mask-image: url('../svgs/trash.svg');
+    -webkit-mask-image: url('../svgs/trash.svg');
 }

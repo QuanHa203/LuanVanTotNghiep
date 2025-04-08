@@ -1,0 +1,26 @@
+﻿@using System.Globalization
+@model List<string>
+
+@if (Model.Count == 0)
+{
+    <h4 class="fg-second">Không có hình ảnh nào</h4>
+    return;
+}
+
+@foreach (string url in Model)
+{
+    try
+    {
+        string fileName = System.IO.Path.GetFileNameWithoutExtension(url);
+
+        <div>
+            <img src="@url" onclick="showOverlayMediaSectionElement(this)" />
+            <i class="fg-second">@DateTime.ParseExact(fileName, "yyyy-MM-dd_HH-mm-ss",
+                        CultureInfo.InvariantCulture).ToString("f")</i>
+</div>
+}
+    catch
+    {
+
+    }
+}

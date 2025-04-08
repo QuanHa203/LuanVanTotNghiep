@@ -7,10 +7,10 @@
 <h1 class="fg-main">Thông tin trạng thái xe</h1>
 
 <p>
-    <a asp-action="Create">Tạo xe mới</a>
+    <a asp-action="Create" class="fg-blue" >Tạo xe mới</a>
 </p>
-<table class="table fg-second">
-    <thead>
+<table class="table">
+    <thead class="fg-main">
         <tr>
             <th>
                 Guid car
@@ -27,7 +27,7 @@
     <tbody>
         @foreach (var item in Model)
         {
-            <tr>
+            <tr class="fg-main" id="car-guid-@item.Id">
                 <td>
                     @Html.DisplayFor(modelItem => item.Id)
                 </td>
@@ -38,9 +38,27 @@
                     @(item.Esp32Camera.IsOnline == true ? "Đang online" : $"Lần online gần nhất: {item.Esp32Camera.LastSeen.ToString("dd/MM/yyyy HH:mm:ss")}")
                 </td>
                 <td>
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    <p class="fg-red m-0 text-decoration-underline cursor-pointer" onclick="deleteConfirm(`@item.Id`)">Xóa</p>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+<script>
+    function deleteConfirm(guid) {
+        if (confirm(`Bạn có muốn xóa xe có Guid: "${guid}"`)) 
+        {
+            fetch(`${document.location.origin}/Car/Delete?id=${guid}`, {method: 'POST' })
+                    .then(response => {                        
+                        if (response.ok) {
+                            document.getElementById(`car-guid-${guid}`).remove()
+                            alert("Xóa thành công");
+                        }
+                        else {
+                            alert("Xóa thất bại");
+                        }
+                    })
+        }
+    }
+</script>

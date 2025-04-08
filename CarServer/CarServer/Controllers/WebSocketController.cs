@@ -1,5 +1,6 @@
 ﻿using CarServer.Databases;
 using CarServer.Services.WebSockets;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.WebSockets;
 
@@ -23,8 +24,7 @@ public class WebSocketController : Controller
         return View(_context.Cars.ToList());
     }
 
-    [HttpGet]
-    public async Task RequireConnectToCar(Guid guid)
+    public async Task MainClientWebSocket()
     {
         if (!HttpContext.WebSockets.IsWebSocketRequest)
         {
@@ -32,27 +32,72 @@ public class WebSocketController : Controller
             return;
         }
 
-        _pendingWebSocketRequests.AddEsp32ControlRequest(guid);
-        _pendingWebSocketRequests.AddEsp32CameraRequest(guid);
+        RequireCarConnectToWebSocket();
+        using (WebSocket webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync())
+        {
+            MainGuestWebSocket mainGuestWebSocket = new(webSocket, _webSocketHandler);
+        }
+    }
+
+    public async Task ClientWebSocket(Guid guidCar)
+    {
+        if (Guid.Empty == guidCar)
+        {
+            HttpContext.Response.StatusCode = 400;
+            return;
+        }
+
+        if (_context.Cars.FirstOrDefault(car => car.Id == guidCar) == null)
+        {
+            HttpContext.Response.StatusCode = 400;
+            return;
+        }
+
+        if (!HttpContext.WebSockets.IsWebSocketRequest)
+        {
+            HttpContext.Response.StatusCode = 400;
+            return;
+        }
 
         using (WebSocket webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync())
         {
-            WebSocketUser webSocketUser = new WebSocketUser(webSocket, guid);
-            await _webSocketHandler.AddWebSocketUser(guid, webSocketUser);
+            using GuestWebSocket guestWebSocket = new(webSocket, _webSocketHandler, guidCar);
         }
     }
 
     [HttpGet]
-    public IActionResult ReconnectToEsp32Control(Guid guid)
+    [EnableCors("AllowSpecificOrigin")]    
+    public IActionResult ReconnectToEsp32Control(Guid guidCar)
     {
-        _pendingWebSocketRequests.AddEsp32ControlRequest(guid);
+        if (Guid.Empty == guidCar)
+            return BadRequest();
+
+        if (_context.Cars.FirstOrDefault(car => car.Id == guidCar) == null)
+            return BadRequest();
+
+        _pendingWebSocketRequests.AddEsp32ControlRequest(guidCar);
         return Ok();
     }
 
     [HttpGet]
-    public IActionResult ReconnectToEsp32Camera(Guid guid)
+    [EnableCors("AllowSpecificOrigin")]
+    public IActionResult ReconnectToEsp32Camera(Guid guidCar)
     {
-        _pendingWebSocketRequests.AddEsp32CameraRequest(guid);
+        if (Guid.Empty == guidCar)
+            return BadRequest();
+
+        if (_context.Cars.FirstOrDefault(car => car.Id == guidCar) == null)
+            return BadRequest();
+
+        _pendingWebSocketRequests.AddEsp32CameraRequest(guidCar);
         return Ok();
+    }
+    private void RequireCarConnectToWebSocket()
+    {
+        foreach (var car in _context.Cars)
+        {
+            _pendingWebSocketRequests.AddEsp32ControlRequest(car.Id);
+            _pendingWebSocketRequests.AddEsp32CameraRequest(car.Id);
+        }
     }
 }

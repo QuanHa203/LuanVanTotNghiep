@@ -1,49 +1,100 @@
 :root {
-    --primary-foreground-color: #99acc2;
-    --secondary-foreground-color: #ccd7e3;
-    --primary-background-color: #1c2340;
-    --secondary-background-color: #151934;
-    --warning-color: #ffae00;
-    --error-color: #f03537;
-    --success-color: #1eff0f;
-    --info-color: #3663fd
+    --primary-foreground-color: #2C3E50;
+    --secondary-foreground-color: #8d99ae;
+    --primary-background-color: #F4F6F9;
+    --secondary-background-color: #f5f5f5;
+    --light-color: #fff;
+    --orange-color: #ffae00;
+    --red-color: #ca0002;
+    --green-color: #0cbd00;
+    --blue-color: #287eb8;
+    --purple-color: #9b69ea;
 }
 
 html {
-  font-size: 14px;
+    font-size: 14px;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+    html {
+        font-size: 16px;
+    }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 html {
-  position: relative;
-  min-height: 100%;
+    position: relative;
+    min-height: 100%;
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
 }
 
 .bg-main {
-    background-color: var(--primary-background-color) !important;
+    background-color: var(--primary-background-color);
 }
 
 .bg-second {
-    background-color: var(--secondary-background-color) !important;
+    background-color: var(--secondary-background-color);
 }
 
 .fg-main {
-    color: var(--primary-foreground-color) !important;
+    color: var(--primary-foreground-color);
 }
 
 .fg-second {
-    color: var(--secondary-foreground-color) !important;
+    color: var(--secondary-foreground-color);
+}
+
+.fg-red {
+    color: var(--red-color);
+}
+
+.fg-blue {
+    color: var(--blue-color);
+}
+
+.fg-yellow {
+    color: var(--yellow-color);
+}
+
+.fg-green {
+    color: var(--green-color);
+}
+
+.btn-no-border {
+    border: none;
+}
+
+.btn-no-bg {
+    background: none;
+}
+
+.nav-a {
+    color: var(--primary-foreground-color);
+    font-size: 16px;
+    padding: 0;
+    margin-right: 24px;
+    transition: 0.2s;
+    text-decoration: none;
+}
+
+.nav-a:hover {
+    color: var(--blue-color);
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.cursor-default {
+    cursor: default;
 }

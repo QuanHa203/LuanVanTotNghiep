@@ -28,7 +28,7 @@ namespace CarServer.Services.WebSockets
         /// <param name="esp32ControlId">Guid requires WebSocket connection</param>
         /// <returns>return false if no WebSocket request is required</returns>
         public bool GetEsp32ControlRequest(Guid esp32ControlId)
-            => _pendingEsp32ControlRequest.TryRemove(esp32ControlId, out bool value);
+            => _pendingEsp32ControlRequest.TryRemove(esp32ControlId, out _);
 
         /// <summary>
         /// Check Guid of Esp32Camera need to connect WebSocket or not
@@ -36,6 +36,6 @@ namespace CarServer.Services.WebSockets
         /// <param name="esp32CameralId">Guid requires WebSocket connection</param>
         /// <returns>return false if no WebSocket request is required</returns>
         public bool GetEsp32CameraRequest(Guid esp32CameralId)
-            => _pendingEsp32CameraRequest.TryRemove(esp32CameralId, out bool value);
+            => _pendingEsp32CameraRequest.TryRemove(esp32CameralId, out _);
     }
 }

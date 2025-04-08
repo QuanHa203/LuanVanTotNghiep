@@ -83,13 +83,14 @@
     webSocketClient@(Model.Item1).onopen = () => {
         console.log("Connected to WebSocket");
 
-        setInterval(() => {
-            let pingText = "ping";
-            let encoder = new TextEncoder();
-            let binaryData = encoder.encode(pingText);
-
-            webSocketClient@(Model.Item1).send(binaryData);
-        }, 5000);
+        const interval = setInterval(() => {
+            if (webSocketClient@(Model.Item1).readyState === WebSocket.CLOSED || webSocketClient@(Model.Item1).readyState === WebSocket.CLOSING)
+                clearInterval(interval);                            
+            else {
+                let pingText = "ping";
+                webSocketClient@(Model.Item1).send(pingText);
+            }
+        }, 3000);
     };
 
     webSocketClient@(Model.Item1).onmessage = (event) => {
@@ -113,5 +114,9 @@
             const imgUrl = URL.createObjectURL(event.data);
             document.getElementById("video-@Model.Item1").src = imgUrl;
         }
+    };
+
+    webSocketClient@(Model.Item1).onclose = () => {
+        
     };
 </script>

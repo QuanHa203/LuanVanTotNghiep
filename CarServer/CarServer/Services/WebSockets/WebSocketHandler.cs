@@ -1,6 +1,4 @@
-﻿using System.Net.WebSockets;
-using System.Collections.Concurrent;
-using System.Text;
+﻿using System.Collections.Concurrent;
 namespace CarServer.Services.WebSockets;
 
 public class WebSocketHandler
@@ -8,74 +6,129 @@ public class WebSocketHandler
     public delegate void OnMessageReceive(ArraySegment<byte> message, int length);
     public delegate void OnWebSocketClose();
 
-    private static readonly ConcurrentDictionary<Guid, WebSocketUser> _webSocketUsers = new();
-    private static readonly ConcurrentDictionary<Guid, WebSocketEsp32Control> _webSocketEsp32Controls = new();
-    private static readonly ConcurrentDictionary<Guid, WebSocketEsp32Camera> _webSocketEsp32Cameras = new();
+    public ConcurrentDictionary<int, MainGuestWebSocket> _mainGuestWebSockets { get; private set; } = new();
+    public ConcurrentDictionary<int, GuestWebSocket> _guestWebSockets { get; private set; } = new();
+    public ConcurrentDictionary<Guid, Esp32ControlWebSocket> _esp32ControlWebSockets { get; private set; } = new();
+    public ConcurrentDictionary<Guid, Esp32CameraWebSocket> _esp32CameraWebSockets { get; private set; } = new();
 
-    public async Task AddWebSocketUser(Guid guidCar, WebSocketUser webSocketUser)
+    public bool AddMainGuestWebSocket(MainGuestWebSocket mainGuestWebSocket) => _mainGuestWebSockets.TryAdd(mainGuestWebSocket.GetHashCode(), mainGuestWebSocket);
+
+    public void RemoveMainGuestWebSocket(MainGuestWebSocket mainGuestWebSocket) => _mainGuestWebSockets.TryRemove(mainGuestWebSocket.GetHashCode(), out _);
+
+    public bool AddGuestWebSocketEvent(GuestWebSocket guestWebSocket)
     {
-        if (_webSocketUsers.ContainsKey(guidCar))
-            return;
+        if (!_guestWebSockets.TryAdd(guestWebSocket.GetHashCode(), guestWebSocket))
+            return false;
 
-        if (!_webSocketUsers.TryAdd(guidCar, webSocketUser))
-            return;
-
-        webSocketUser.onClose += () =>
-        {
-            _webSocketUsers.TryRemove(guidCar, out _);
-        };
-        await webSocketUser.ConnectToWebSocket();
+        RegisterGuestWebSocketEvent(guestWebSocket);
+        return true;
     }
 
-    public async Task AddWebSocketEsp32Control(Guid guidCar, WebSocketEsp32Control webSocketEsp32Control)
+    public void RemoveGuestWebSocketEvent(GuestWebSocket guestWebSocket)
     {
-        if (!_webSocketUsers.TryGetValue(guidCar, out var webSocketUser))
+        if (!_guestWebSockets.TryRemove(guestWebSocket.GetHashCode(), out _))
             return;
 
-        _webSocketEsp32Controls.TryAdd(guidCar, webSocketEsp32Control);
-
-        webSocketUser.onClose += () =>
-        {
-            _webSocketEsp32Controls.TryRemove(guidCar, out _);
-        };
-        webSocketUser.onMessageReceive += async (messageReceive, length) => await webSocketEsp32Control.SendDataToEsp32ControlAsync(messageReceive);
-
-
-        webSocketEsp32Control.onClose += async () =>
-        {
-            byte[] closeData = Encoding.UTF8.GetBytes("Esp32ControlClosed");
-            await webSocketUser.SendDataToBrowserAsync(new ArraySegment<byte>(closeData), closeData.Length, WebSocketMessageType.Text);
-        };
-
-        webSocketEsp32Control.onMessageReceive += async (messageReceive, length) 
-            => await webSocketUser.SendDataToBrowserAsync(messageReceive, length, WebSocketMessageType.Text);
-
-        await webSocketEsp32Control.ConnectToWebSocket();
+        UnregisterGuestWebSocketEvent(guestWebSocket);
     }
 
-    public async Task AddWebSocketEsp32Camera(Guid guidCar, WebSocketEsp32Camera webSocketEsp32Camera)
+    public bool AddEsp32ControlWebSocketEvent(Esp32ControlWebSocket esp32ControlWebSocket)
     {
-        if (!_webSocketUsers.TryGetValue(guidCar, out var webSocketUser))
+        if (!_esp32ControlWebSockets.TryAdd(esp32ControlWebSocket.GetGuid(), esp32ControlWebSocket))
+            return false;
+
+        RegisterEsp32ControlWebSocketEvent(esp32ControlWebSocket);
+        return true;
+    }
+
+    public void RemoveEsp32ControlWebSocketEvent(Esp32ControlWebSocket esp32ControlWebSocket)
+    {
+        if (!_esp32ControlWebSockets.TryRemove(esp32ControlWebSocket.GetGuid(), out _))
             return;
 
-        _webSocketEsp32Cameras.TryAdd(guidCar, webSocketEsp32Camera);
-
-        webSocketUser.onClose += () =>
-        {
-            _webSocketEsp32Cameras.TryRemove(guidCar, out _);
-        };
-
-        
-        webSocketEsp32Camera.onClose += async () =>
-        {
-            byte[] closeData = Encoding.UTF8.GetBytes("Esp32CameraClosed");
-            await webSocketUser.SendDataToBrowserAsync(new ArraySegment<byte>(closeData), closeData.Length, WebSocketMessageType.Text);
-        };
-
-        webSocketEsp32Camera.onMessageReceive += async (messageReceive, length)
-            => await webSocketUser.SendDataToBrowserAsync(messageReceive, length, WebSocketMessageType.Binary);
-        
-        await webSocketEsp32Camera.ConnectToWebSocket();
+        UnregisterEsp32ControlWebSocketEvent(esp32ControlWebSocket);
     }
 
+    public bool AddEsp32CameraSocketEvent(Esp32CameraWebSocket esp32CameraWebSocket)
+    {
+        if (!_esp32CameraWebSockets.TryAdd(esp32CameraWebSocket.GetGuid(), esp32CameraWebSocket))
+            return false;
+
+        RegisterEsp32CameraWebSocketEvent(esp32CameraWebSocket);
+        return true;
+    }
+
+    public void RemoveEsp32CameraSocketEvent(Esp32CameraWebSocket esp32CameraWebSocket)
+    {
+        if (!_esp32CameraWebSockets.TryRemove(esp32CameraWebSocket.GetGuid(), out _))
+            return;
+
+        UnregisterEsp32CameraWebSocketEvent(esp32CameraWebSocket);
+    }
+
+    private void RegisterGuestWebSocketEvent(GuestWebSocket guestWebSocket)
+    {
+        foreach (var item in _esp32ControlWebSockets.Values)
+        {
+            guestWebSocket.SubscribeToEsp32ControlWebSocket(item);
+            item.SubscribeToGuestWebSocket(guestWebSocket);
+        }
+
+        foreach (var item in _esp32CameraWebSockets.Values)
+        {
+            guestWebSocket.SubscribeToEsp32CameraWebSocket(item);
+            item.SubscribeToGuestWebSocket(guestWebSocket);
+        }
+    }
+
+    private void RegisterEsp32ControlWebSocketEvent(Esp32ControlWebSocket esp32ControlWebSocket)
+    {
+        foreach (var item in _guestWebSockets.Values)
+        {
+            esp32ControlWebSocket.SubscribeToGuestWebSocket(item);
+            item.SubscribeToEsp32ControlWebSocket(esp32ControlWebSocket);
+        }
+    }
+
+    private void RegisterEsp32CameraWebSocketEvent(Esp32CameraWebSocket esp32CameraWebSocket)
+    {
+        foreach (var item in _guestWebSockets.Values)
+        {
+            esp32CameraWebSocket.SubscribeToGuestWebSocket(item);
+            item.SubscribeToEsp32CameraWebSocket(esp32CameraWebSocket);
+        }
+    }
+
+    private void UnregisterGuestWebSocketEvent(GuestWebSocket guestWebSocket)
+    {
+        foreach (var item in _esp32ControlWebSockets.Values)
+        {
+            guestWebSocket.UnsubscribeFromEsp32ControlWebSocket(item);
+            item.UnsubscribeFromGuestWebSocket(guestWebSocket);
+        }
+
+        foreach (var item in _esp32CameraWebSockets.Values)
+        {
+            guestWebSocket.UnsubscribeFromEsp32CameraWebSocket(item);
+            item.UnsubscribeFromGuestWebSocket(guestWebSocket);
+        }
+    }
+
+    private void UnregisterEsp32ControlWebSocketEvent(Esp32ControlWebSocket esp32ControlWebSocket)
+    {
+        foreach (var item in _guestWebSockets.Values)
+        {
+            esp32ControlWebSocket.UnsubscribeFromGuestWebSocket(item);
+            item.UnsubscribeFromEsp32ControlWebSocket(esp32ControlWebSocket);
+        }
+    }
+
+    private void UnregisterEsp32CameraWebSocketEvent(Esp32CameraWebSocket esp32CameraWebSocket)
+    {
+        foreach (var item in _guestWebSockets.Values)
+        {
+            esp32CameraWebSocket.UnsubscribeFromGuestWebSocket(item);
+            item.UnsubscribeFromEsp32CameraWebSocket(esp32CameraWebSocket);
+        }
+    }
 }
