@@ -2,17 +2,17 @@
 
 public class ImageCapturer
 {
-    public static async Task<bool> ScreenshotAsync(byte[] buffer, Guid guidCar)
+    public static async Task<bool> ScreenshotAsync(byte[] buffer, string imagePath)
     {
         try
         {
-            string imgPath = Path.Combine(AppContext.BaseDirectory, "wwwroot" ,"Medias", guidCar.ToString(), "Screenshots", DateTime.Now.ToString("yyyy-MM-dd"));
-            if (!Directory.Exists(imgPath))
+            imagePath = Path.Combine(imagePath, DateTime.Now.ToString("yyyy-MM-dd"));
+            if (!Directory.Exists(imagePath))
             {
-                Directory.CreateDirectory(imgPath);
+                Directory.CreateDirectory(imagePath);
             }
 
-            string outputPath = Path.Combine(imgPath, $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.jpg");
+            string outputPath = Path.Combine(imagePath, $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.jpg");
             await File.WriteAllBytesAsync(outputPath, buffer);
             return true;
         }

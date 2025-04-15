@@ -1,4 +1,6 @@
-﻿using CarServer.Models;
+﻿using System;
+using System.Collections.Generic;
+using CarServer.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarServer.Databases;
@@ -6,7 +8,7 @@ namespace CarServer.Databases;
 public partial class CarServerDbContext : DbContext
 {
     public CarServerDbContext()
-    {
+    {        
     }
 
     public CarServerDbContext(DbContextOptions<CarServerDbContext> options)
@@ -14,9 +16,13 @@ public partial class CarServerDbContext : DbContext
     {
     }
 
+    public virtual DbSet<Accessory> Accessories { get; set; }
+
     public virtual DbSet<AppUser> AppUsers { get; set; }
 
     public virtual DbSet<Car> Cars { get; set; }
+
+    public virtual DbSet<CarAccessory> CarAccessories { get; set; }
 
     public virtual DbSet<Esp32Camera> Esp32Cameras { get; set; }
 
@@ -24,12 +30,18 @@ public partial class CarServerDbContext : DbContext
 
     public virtual DbSet<Role> Roles { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server = DESKTOP-3TKOLCA; UID = Guest; Password = 270603; Database = CarServerDb ;TrustServerCertificate = true");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Accessory>(entity =>
+        {
+            entity.ToTable("Accessory");
+
+            entity.Property(e => e.ImageUrl)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.Name).HasMaxLength(50);
+        });
+
         modelBuilder.Entity<AppUser>(entity =>
         {
             entity.ToTable("AppUser");
@@ -38,14 +50,14 @@ public partial class CarServerDbContext : DbContext
             entity.Property(e => e.Email)
                 .HasMaxLength(50)
                 .IsUnicode(false);
-            entity.Property(e => e.PasswordHash)
-                .HasMaxLength(50)
-                .IsUnicode(false);
+            entity.Property(e => e.PasswordHash).HasMaxLength(200);
+            entity.Property(e => e.PasswordResetToken).HasMaxLength(200);
+            entity.Property(e => e.PasswordResetTokenExpiry).HasColumnType("datetime");
             entity.Property(e => e.UserName)
-                .HasMaxLength(50)
-                .IsUnicode(false);
+                .HasMaxLength(100)
+                .UseCollation("Latin1_General_CS_AS");
 
-            entity.HasOne(d => d.IdRoleNavigation).WithMany(p => p.AppUsers)
+            entity.HasOne(d => d.Role).WithMany(p => p.AppUsers)
                 .HasForeignKey(d => d.IdRole)
                 .HasConstraintName("FK_AppUser_Role");
         });
@@ -55,6 +67,11 @@ public partial class CarServerDbContext : DbContext
             entity.ToTable("Car");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Description).HasMaxLength(500);
+            entity.Property(e => e.ImageUrl)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.Name).HasMaxLength(50);
 
             entity.HasOne(d => d.Esp32Camera).WithOne(p => p.Car)
                 .HasForeignKey<Car>(d => d.Id)
@@ -63,6 +80,23 @@ public partial class CarServerDbContext : DbContext
             entity.HasOne(d => d.Esp32Control).WithOne(p => p.Car)
                 .HasForeignKey<Car>(d => d.Id)
                 .HasConstraintName("FK_Car_Esp32Control");
+        });
+
+        modelBuilder.Entity<CarAccessory>(entity =>
+        {
+            entity.HasKey(e => new { e.IdCar, e.IdAccessory });
+
+            entity.ToTable("CarAccessory");
+
+            entity.HasOne(d => d.Accessory).WithMany(p => p.CarAccessories)
+                .HasForeignKey(d => d.IdAccessory)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CarAccessory_Accessory");
+
+            entity.HasOne(d => d.Car).WithMany(p => p.CarAccessories)
+                .HasForeignKey(d => d.IdCar)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_CarAccessory_Car");
         });
 
         modelBuilder.Entity<Esp32Camera>(entity =>

@@ -1,0 +1,83 @@
+﻿@model CarServer.Controllers.CarController.CarModel
+
+@{
+    ViewData["Title"] = "Chỉnh sửa";
+}
+<link rel="stylesheet" href="~/css/car.css" />
+
+<h1 class="fg-main">Chỉnh sửa</h1>
+
+<hr />
+<div class="row fg-main">
+    <div class="col-md-4">
+        <form asp-action="Edit" enctype="multipart/form-data" method="post">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-group">
+                <label class="form-label">Tên xe</label>
+                <input class="form-control bg-main fg-second" asp-for="Name" value="@(Model.Name ?? "")" />
+                <span class="fg-red" asp-validation-for="Name"></span>
+            </div>
+
+            <div class="form-group dropdown-accessory">
+                <label class="form-label">Chọn linh kiện</label>
+                <input class="form-control" type="text" onkeydown="return false" />
+                <div class="dropdown-accessory-content">
+                    @for (int i = 0; i < Model.Accessories.Count; i++)
+                    {
+                        var accessory = Model.Accessories[i];
+                        <div class="accessory-option">
+                            <input class="accessory-id" type="hidden" asp-for="@Model.Accessories[i].IdAccessory" value="@accessory.IdAccessory" />
+                            <input class="accessory-name" type="hidden" asp-for="@Model.Accessories[i].Name" value="@accessory.Name" />
+                            <input class="accessory-is-select" type="checkbox" asp-for="@Model.Accessories[i].IsSelect" onchange="inputCheckboxChange(this)" />
+                            <label>@accessory.Name - Số lượng:</label>
+                            <input class="accessory-quantity" type="number" asp-for="@Model.Accessories[i].Quantity" value="@accessory.Quantity" min="1" onchange="inputNumberChange(this)" />
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="selected-accessories" id="selected-accessory-container"></div>
+
+            <div class="form-group">
+                <label class="form-label">Mô tả</label>
+                <input class="form-control bg-main fg-second" asp-for="Description" value="@(Model.Description ?? "")" />
+                <span class="fg-red" asp-validation-for="Description"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="ImageFile" class="form-label">Hình ảnh trước</label>
+                @if (Model.OldImageUrl == null)
+                {
+                    <label class="w-100 mb-4">Hình ảnh trước chưa có</label>
+                }
+                else
+                {
+                    <img class="w-100 mt-2 mb-4" src="@Model.OldImageUrl" />
+                    <input type="hidden" asp-for="OldImageUrl"/>
+                }
+            </div>
+
+            <div class="form-group">
+                <label for="ImageFile" class="form-label">Chọn hình mới</label>
+                <input class="form-control" type="file" asp-for="ImageFile" id="ImageFile" accept="image/*">
+            </div>
+
+            <div class="form-group mt-2">
+                <input type="submit" value="Chỉnh sửa" class="btn-padding btn-no-border btn-border-radius fg-white bg-blue" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Quay lại danh sách xe</a>
+</div>
+
+<script src="~/js/car.js"></script>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

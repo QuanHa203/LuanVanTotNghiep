@@ -1,8 +1,10 @@
 using CarServer.BackgroundServices;
 using CarServer.Databases;
 using CarServer.Middleware;
+using CarServer.Repositories.Implementations;
+using CarServer.Repositories.Interfaces;
+using CarServer.Services.Email;
 using CarServer.Services.WebSockets;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -46,6 +48,11 @@ builder.Services.AddHostedService<OnlineStatusChecker>();
 builder.Services.AddSingleton<PendingWebSocketRequests>();
 builder.Services.AddSingleton<WebSocketHandler>();
 builder.Services.AddTransient<ProtectedMediasFolderMiddleware>();
+
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+builder.Services.Configure<EmailSetting>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddTransient<IEmailService, EmailService>();
 
 var app = builder.Build();
 

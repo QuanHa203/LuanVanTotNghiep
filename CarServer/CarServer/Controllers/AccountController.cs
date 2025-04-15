@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using CarServer.Databases;
 using CarServer.Models;
+using CarServer.Services.Email;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
@@ -14,10 +15,12 @@ namespace CarServer.Controllers
     {
         private readonly PasswordHasher<AppUser> _passwordHasher = new();
         private readonly CarServerDbContext _context;
+        private readonly IEmailService _emailService;
 
-        public AccountController(CarServerDbContext context)
+        public AccountController(CarServerDbContext context, IEmailService emailService)
         {
             _context = context;
+            _emailService = emailService;
         }
 
         [HttpGet]
@@ -29,13 +32,21 @@ namespace CarServer.Controllers
         [HttpGet]
         public IActionResult ForgotPassword() => View();
 
+        [HttpGet]
+        public IActionResult ResetPassword(string resetPasswordToken)
+            => View(new ResetPasswordModel
+            {
+                Token = resetPasswordToken
+            });
+
+
         [HttpPost]
         public async Task<IActionResult> Login(AppUserLogin appUserLogin)
         {
             if (!ModelState.IsValid)
                 return View();
 
-            var appUser = _context.AppUsers.Include(aU => aU.IdRoleNavigation).FirstOrDefault(aU => aU.UserName == appUserLogin.UserNameOrEmail.Trim() || aU.Email.Trim() == appUserLogin.UserNameOrEmail.Trim());
+            var appUser = _context.AppUsers.Include(aU => aU.Role).FirstOrDefault(aU => aU.UserName == appUserLogin.UserNameOrEmail.Trim() || aU.Email.Trim() == appUserLogin.UserNameOrEmail.Trim());
 
             if (appUser == null)
             {
@@ -53,8 +64,8 @@ namespace CarServer.Controllers
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, appUser.UserName),
-                new Claim(ClaimTypes.Email, appUser.Email),                
-                new Claim(ClaimTypes.Role, appUser.IdRoleNavigation.RoleName)
+                new Claim(ClaimTypes.Email, appUser.Email),
+                new Claim(ClaimTypes.Role, appUser.Role.RoleName)
             };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -65,9 +76,9 @@ namespace CarServer.Controllers
         }
 
         [HttpPost]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Index", "Home");
         }
 
@@ -105,10 +116,56 @@ namespace CarServer.Controllers
         }
 
         [HttpPost]
-        public IActionResult ForgotPassword(string email)
+        public async Task<IActionResult> ForgotPassword(string email)
         {
+            var appUser = _context.AppUsers.FirstOrDefault(aU => aU.Email == email);
+            if (appUser == null)
+            {
+                ModelState.AddModelError("email", "Email không tồn tại");
+                return View();
+            }
 
-            return View();
+            string resetPasswordToken = Guid.NewGuid().ToString();
+            DateTime expiry = DateTime.UtcNow.AddHours(1);            
+
+            appUser.PasswordResetToken = resetPasswordToken;
+            appUser.PasswordResetTokenExpiry = expiry;
+
+            _context.AppUsers.Update(appUser);
+            await _context.SaveChangesAsync();
+
+            string resetLink = Url.Action(nameof(ResetPassword), "Account", new { resetPasswordToken = resetPasswordToken }, Request.Scheme)!;
+
+            string html = $"<p>Nhấn vào <a href='{resetLink}'>đây</a> để đặt lại mật khẩu. Link này sẽ hết hạn sau 1 giờ.</p>";
+            _ = _emailService.SendEmailAsync(email, "Reset mật khẩu", html);
+            return Ok();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ResetPassword(ResetPasswordModel resetPasswordModel)
+        {
+            if (!ModelState.IsValid)
+                return View();
+
+            if (resetPasswordModel.Token == null)
+            {
+                ModelState.AddModelError("", "Token không hợp lệ hoặc đã hết hạn");
+                return View();
+            }
+
+            var appUser = _context.AppUsers.FirstOrDefault(aU => aU.PasswordResetToken == resetPasswordModel.Token && aU.PasswordResetTokenExpiry > DateTime.UtcNow);
+
+            if (appUser == null)
+            {
+                ModelState.AddModelError("", "Token không hợp lệ hoặc đã hết hạn");
+                return View();
+            }
+
+            appUser.PasswordResetToken = null;
+            appUser.PasswordHash = _passwordHasher.HashPassword(null!, resetPasswordModel.NewPassword);
+            _context.AppUsers.Update(appUser);
+            await _context.SaveChangesAsync();
+            return Ok();
         }
 
         public class AppUserLogin
@@ -143,6 +200,21 @@ namespace CarServer.Controllers
             [Display(Name = "Mật khẩu lặp lại")]
             [Compare("Password", ErrorMessage = "{0} không trùng khớp")]
             public string ReEnterPassword { get; set; } = null!;
+        }
+
+        public class ResetPasswordModel
+        {
+            public string Token { get; set; } = null!;
+
+            [Required(ErrorMessage = "{0} phải nhập")]
+            [Display(Name = "Mật khẩu")]
+            [StringLength(maximumLength: 50, MinimumLength = 3, ErrorMessage = "{0} dài từ {2} ký tự")]
+            public string NewPassword { get; set; } = null!;
+
+            [Required(ErrorMessage = "{0} phải nhập")]
+            [Display(Name = "Mật khẩu lặp lại")]
+            [Compare("NewPassword", ErrorMessage = "{0} không trùng khớp")]
+            public string ReEnterNewPassword { get; set; } = null!;
         }
     }
 }

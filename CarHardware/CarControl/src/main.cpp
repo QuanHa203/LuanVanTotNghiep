@@ -6,7 +6,9 @@
 #include "ArduinoWebsockets.h"
 
 #include "L298N_Control.h"
-#include "Device_Control.h"
+#include "L298N.h"
+#include "L293D_Control.h"
+#include "IDevice_Control.h"
 
 #define DHTPIN 15 // GPIO15
 #define DHTTYPE DHT11
@@ -14,6 +16,7 @@
 #define LED_1 2 // GPIO2
 #define LED_2 4 // GPIO4
 
+/* L298N Pinout (ESP32 30 Pin) */
 #define IN1A 16 // GPIO16 (RX2)
 #define IN2A 17 // GPIO17 (TX2)
 #define IN3A 5  // GPIO5
@@ -24,12 +27,28 @@
 #define IN3B 25 // GPIO25
 #define IN4B 26 // GPIO26
 
-const char *ssid = "VIETTEL_Thu Quan";
-const char *password = "hoibochau";
-// const String guid = "6bc780d5-199a-4bb9-bb30-511a25c307de";
-const String guid = "9d6c11d7-26dd-4903-b6a5-a50c23cc3883";
-const String checkOnlineUrl = "http://192.168.1.100:1234/CarControl/CheckOnline?guid=" + guid;
-const String webSocketUrl = "ws://192.168.1.100:1234/CarControl/Control?guid=" + guid;
+/* L293D Pinout (ESP32 38 Pin) */
+#define PWM_2B 12           // D3
+#define DIR_CLK 14          // D4
+#define PWM_0B 27           // D5
+#define PWM_0A 26           // D6
+#define DIR_EN 25           // D7
+#define DIR_SER 19          // D8  - GPIO 16(RX2)
+// #define PWM_1A 18        // D9  - GPIO 17(TX2)
+// #define PWM_1B 5         // D10
+#define PWM_2A 17           // D11
+#define DIR_LATCH 16        // D12
+
+// const char *ssid = "VIETTEL_Thu Quan";
+// const char *password = "hoibochau";
+
+const char *ssid = "TestPhone";
+const char *password = "88888888";
+
+const String guid = "6bc780d5-199a-4bb9-bb30-511a25c307de";
+// const String guid = "9d6c11d7-26dd-4903-b6a5-a50c23cc3883";
+const String checkOnlineUrl = "http://192.168.53.100:1234/CarCheckOnline/CheckEsp32ControlOnline?guid=" + guid;
+const String webSocketUrl = "ws://192.168.53.100:1234/WebSocket/Esp32ControlWebSocket?guid=" + guid;
 
 const int maxRetries = 4;
 bool isWebSocketConnected = false;
@@ -37,9 +56,12 @@ unsigned long lastPongTime = 0;
 unsigned long timeOut = 5000;
 
 websockets::WebsocketsClient webSocketClient;
-L298N_Control l298nA(IN1A, IN2A, IN3A, IN4A);
-L298N_Control l298nB(IN1B, IN2B, IN3B, IN4B);
-Device_Control deviceControl(l298nA, l298nB);
+
+L298N l298nA(IN1A, IN2A, IN3A, IN4A);
+L298N l298nB(IN1B, IN2B, IN3B, IN4B);
+IDevice_Control* deviceControl = new L298N_Control(l298nA, l298nB);
+
+// IDevice_Control* deviceControl = new L293D_Control(DIR_LATCH, DIR_SER, DIR_EN, DIR_CLK, PWM_0A, PWM_0B, PWM_2A, PWM_2B);
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -143,7 +165,7 @@ void handleWebSocketTask(void *pvParameters)
 
   webSocketClient.close();
   Serial.println("WebSocket closed");
-  deviceControl.brake();
+  deviceControl->brake();
   vTaskDelete(NULL);
 }
 
@@ -226,19 +248,19 @@ void onMessageCallback(websockets::WebsocketsMessage message)
     Serial.println(command);
 
     if (command == "brake")
-      deviceControl.brake();
+      deviceControl->brake();
 
     else if (command == "forward")
-      deviceControl.forward();
+      deviceControl->forward();
 
     else if (command == "backward")
-      deviceControl.backward();
+      deviceControl->backward();
 
     else if (command == "turnleft")
-      deviceControl.turnLeft();
+      deviceControl->turnLeft();
 
     else if (command == "turnright")
-      deviceControl.turnRight();
+      deviceControl->turnRight();
 
     else if (command == "ledon")
       ledOn();

@@ -15,5 +15,9 @@ public partial class AppUser
 
     public string PasswordHash { get; set; } = null!;
 
-    public virtual Role IdRoleNavigation { get; set; } = null!;
+    public DateTime? PasswordResetTokenExpiry { get; set; }
+
+    public string? PasswordResetToken { get; set; }
+
+    public virtual Role Role { get; set; } = null!;
 }

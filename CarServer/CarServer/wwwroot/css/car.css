@@ -1,0 +1,37 @@
+﻿.dropdown-accessory {
+    position: relative;
+}
+
+.dropdown-accessory-content {
+    display: none;
+    position: absolute;
+    background-color: #f1f1f1;
+    width: 100%;
+    max-height: 180px;
+    overflow-y: auto;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    padding: 12px;
+}
+
+.dropdown-accessory:hover .dropdown-accessory-content {
+    display: block;
+}
+
+.accessory-option {
+    width: 100%;
+    margin-bottom: 8px;
+}
+
+.accessory-option .accessory-quantity {
+    width: 52px;
+}
+
+#selected-accessory-container {
+    margin: 12px 0;
+}
+
+#selected-accessory-container > label {
+    width: 100%;
+    margin: 4px 0;
+}

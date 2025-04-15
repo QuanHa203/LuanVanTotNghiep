@@ -21,12 +21,16 @@
 #define HREF_GPIO_NUM 23
 #define PCLK_GPIO_NUM 22
 
-const char *ssid = "VIETTEL_Thu Quan";
-const char *password = "hoibochau";
+// const char *ssid = "VIETTEL_Thu Quan";
+// const char *password = "hoibochau";
 
-const String guid = "9d6c11d7-26dd-4903-b6a5-a50c23cc3883";
-const String checkOnlineUrl = "http://192.168.1.100:1234/CarCamera/CheckOnline?guid=" + guid;
-const String webSocketUrl = "ws://192.168.1.100:1234/CarCamera/Camera?guid=" + guid;
+const char *ssid = "TestPhone";
+const char *password = "88888888";
+
+const String guid = "6bc780d5-199a-4bb9-bb30-511a25c307de";
+// const String guid = "9d6c11d7-26dd-4903-b6a5-a50c23cc3883";
+const String checkOnlineUrl = "http://192.168.53.100:1234/CarCheckOnline/CheckEsp32CameraOnline?guid=" + guid;
+const String webSocketUrl = "ws://192.168.53.100:1234/WebSocket/Esp32CameraWebSocket?guid=" + guid;
 
 const int maxRetries = 4;
 bool isWebSocketConnected = false;

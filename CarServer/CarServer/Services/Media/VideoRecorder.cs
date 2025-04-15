@@ -8,12 +8,12 @@ public class VideoRecorder
     private VideoCreator _videoCreator = null!;
     private static readonly ConcurrentDictionary<Guid, bool> _videoRecordings = new();
 
-    public VideoRecorder(Guid guid)
+    public VideoRecorder(Guid guid, string videoPath)
     {
         if (_videoRecordings.ContainsKey(guid))
             return;
 
-        string outputPath = InitializeVideoPath(guid);
+        string outputPath = InitializeVideoPath(guid, videoPath);
         _videoRecordings.TryAdd(guid, true);
         _videoCreator = new VideoCreator(outputPath, 320, 240, 30);
     }
@@ -27,12 +27,12 @@ public class VideoRecorder
         _videoRecordings.TryRemove(guid, out _);
     }
 
-    private string InitializeVideoPath(Guid guid)
+    private string InitializeVideoPath(Guid guid, string videoPath)
     {
-        string recordingPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "Medias", guid.ToString(), "Recordings", DateTime.Now.ToString("yyyy-MM-dd"));
-        if (!Directory.Exists(recordingPath))
-            Directory.CreateDirectory(recordingPath);
+        videoPath = Path.Combine(videoPath, DateTime.Now.ToString("yyyy-MM-dd"));
+        if (!Directory.Exists(videoPath))
+            Directory.CreateDirectory(videoPath);
 
-        return Path.Combine(recordingPath, $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.mp4");
+        return Path.Combine(videoPath, $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.mp4");
     }
 }

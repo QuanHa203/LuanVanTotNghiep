@@ -1,0 +1,33 @@
+﻿@model CarServer.Controllers.AccessoryController.AccessoryCreateModel
+@{
+    ViewData["Title"] = "Tạo mới";
+}
+
+<h1 class="fg-main">Tạo linh kiện mới</h1>
+
+<hr />
+<div class="row fg-main">
+    <div class="col-md-4">
+        <form asp-action="Create" enctype="multipart/form-data" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>            
+            <div class="form-group">
+                <label class="form-label">Tên linh kiện</label>
+                <input class="form-control bg-main fg-second" asp-for="Name" />
+                <span class="fg-red" asp-validation-for="Name"></span>
+            </div>
+
+            <div class="form-group">
+                <label for="ImageFile" class="form-label">Chọn hình ảnh</label>
+                <input class="form-control" type="file" asp-for="ImageFile" id="ImageFile" accept="image/*">
+            </div>
+            <div class="form-group mt-2">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+

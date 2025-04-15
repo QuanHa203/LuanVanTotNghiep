@@ -1,5 +1,4 @@
 ﻿using CarServer.Services.Media;
-using FFmpeg.AutoGen;
 using System.Diagnostics;
 using System.Net.WebSockets;
 using System.Text;
@@ -28,7 +27,10 @@ public class GuestWebSocket : IDisposable
     private int _webSocketTimeOut = 10000;
     private bool _isWebSocketOpen = false;
 
-    public GuestWebSocket(WebSocket webSocket, WebSocketHandler webSocketHandler, Guid guidCar)
+    private readonly string _imagePath;
+    private readonly string _videoPath;
+
+    public GuestWebSocket(WebSocket webSocket, WebSocketHandler webSocketHandler, Guid guidCar, IWebHostEnvironment webHostEnvironment)
     {
         _webSocket = webSocket;
         _webSocketHandler = webSocketHandler;
@@ -36,6 +38,9 @@ public class GuestWebSocket : IDisposable
 
         _isWebSocketOpen = true;
         _lastPingTime = stopwatch.ElapsedMilliseconds;
+
+        _imagePath = Path.Combine(webHostEnvironment.WebRootPath, "Medias", guidCar.ToString(), "Screenshots");
+        _videoPath = Path.Combine(webHostEnvironment.WebRootPath, "Medias", guidCar.ToString(), "Recordings");
 
         if (!_webSocketHandler.AddGuestWebSocketEvent(this))
             return;
@@ -68,7 +73,6 @@ public class GuestWebSocket : IDisposable
             byte[] message = Encoding.UTF8.GetBytes($"Esp32ControlClosed: {_guidCar}");
             await SendDataToBrowserAsync(message, message.Length, WebSocketMessageType.Text);
         };
-
     }
 
     public void UnsubscribeFromEsp32ControlWebSocket(Esp32ControlWebSocket esp32ControlWebSocket)
@@ -212,7 +216,7 @@ public class GuestWebSocket : IDisposable
         if (!isScreenShot)
             return;
 
-        if (await ImageCapturer.ScreenshotAsync(dataFromEsp32Camera.Array!, _guidCar))
+        if (await ImageCapturer.ScreenshotAsync(dataFromEsp32Camera.Array!, _imagePath))
             await _webSocket.SendAsync(Encoding.UTF8.GetBytes("ScreenshotTaken"), WebSocketMessageType.Text, true, CancellationToken.None);
 
         isScreenShot = false;
@@ -225,7 +229,7 @@ public class GuestWebSocket : IDisposable
         {
             if (!isInitVideoRecorder)
             {
-                _videoRecorder = new VideoRecorder(_guidCar);
+                _videoRecorder = new VideoRecorder(_guidCar, _videoPath);
                 isInitVideoRecorder = true;
             }
             if (length <= 4)

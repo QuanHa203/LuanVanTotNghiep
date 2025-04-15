@@ -13,12 +13,14 @@
     {
         string fileName = System.IO.Path.GetFileNameWithoutExtension(url);
 
-        <div>
+        <div class="media-box-child">
             <img src="@url" onclick="showOverlayMediaSectionElement(this)" />
-            <i class="fg-second">@DateTime.ParseExact(fileName, "yyyy-MM-dd_HH-mm-ss",
-                        CultureInfo.InvariantCulture).ToString("f")</i>
-</div>
-}
+            <i class="fg-second">
+                @DateTime.ParseExact(fileName, "yyyy-MM-dd_HH-mm-ss",
+                         CultureInfo.InvariantCulture).ToString("f")
+            </i>
+        </div>
+    }
     catch
     {
 

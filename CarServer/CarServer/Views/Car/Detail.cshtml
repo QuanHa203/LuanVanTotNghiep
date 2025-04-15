@@ -1,0 +1,65 @@
+﻿@model CarServer.Models.Car
+
+@{
+    ViewData["Title"] = "Chi tiết";
+}
+
+
+<style>
+    .car-detail {
+        border-radius: 16px;
+        background-color: #fdfdfd;
+    }
+
+    .car-image {
+        
+    }
+
+        .car-image img {
+            border-radius: 12px;
+            object-fit: cover;
+            height: 100%;
+            width: 100%;
+        }
+
+</style>
+
+<div class="container my-5">
+    <div class="car-detail card shadow-lg p-4">
+        <div class="row">            
+            <div class="col-md-7 align-self-center">
+                <div class="car-image rounded overflow-hidden">
+                    <img src="@Model.ImageUrl" alt="Hình ảnh sản phẩm" class="img-fluid w-100 h-100 object-fit-cover" />
+                </div>
+            </div>
+            
+            <div class="col-md-5">
+                <div class="car-info">
+                    <h2 class="mb-3">@Model.Name</h2>
+
+                    <h5 class="mb-2">🔧 Các linh kiện đi kèm:</h5>
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><strong>Tên linh kiện</strong></span>
+                            <span class=""><strong>Số lượng</strong></span>
+                        </li>
+                        @foreach (var ca in Model.CarAccessories)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>@ca.Accessory.Name</span>
+                                <span class="fg-blue">@ca.Quantity</span>
+                            </li>
+                        }
+                    </ul>
+
+                    <h6 class="fw-bold">📄 Mô Tả:</h6>
+                    <p class="text-muted">@Model.Description</p>
+
+                    <a asp-action="Index" class="fg-blue mt-3">
+                        Quay lại danh sách xe
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -4,16 +4,25 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>	  
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
     <Folder Include="Databases\" />
     <Folder Include="Helpers\" />
+	  <Folder Include="wwwroot\Medias" />
   </ItemGroup>
 
-  <ItemGroup>
+	<ItemGroup>
+		<Content Update="wwwroot\**">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+
+	<ItemGroup>
     <PackageReference Include="FFmpeg.AutoGen" Version="7.0.0" />
+    <PackageReference Include="MailKit" Version="4.11.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.14">
       <PrivateAssets>all</PrivateAssets>

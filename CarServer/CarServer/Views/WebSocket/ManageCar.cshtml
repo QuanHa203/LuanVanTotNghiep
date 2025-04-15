@@ -68,7 +68,7 @@
 </script>
 
 <script>
-    const mainWebSocket = new WebSocket(`ws://192.168.1.100:1234/WebSocket/MainClientWebSocket`)
+    const mainWebSocket = new WebSocket(`ws://${document.location.host}/WebSocket/MainGuestWebSocket`)
     mainWebSocket.binaryType = "arraybuffer"
     mainWebSocket.onopen = () => {
         console.log("Connected to WebSocket");
@@ -92,7 +92,7 @@
     };
 
     function openCarWebSocket(guidCar) {
-        const url = `ws://192.168.1.100:1234/WebSocket/ClientWebSocket?guidCar=${guidCar}`;
+        const url = `ws://${document.location.host}/WebSocket/GuestWebSocket?guidCar=${guidCar}`;
         let ws = new WebSocket(url);
         const html = `
         <div class="car-control-box" id="car-control-box-${guidCar}">
@@ -345,7 +345,7 @@
         });
 
         btnReconnectToEsp32Control.addEventListener("click", async (e) => {
-            fetch(`http://192.168.1.100:1234/WebSocket/ReconnectToEsp32Control?guidCar=${guidCar}`,
+            fetch(`${document.location.origin}/WebSocket/ReconnectToEsp32Control?guidCar=${guidCar}`,
                 {
                     method: 'GET'
                 });
@@ -356,7 +356,7 @@
         });
 
         btnReconnectToEsp32Camera.addEventListener("click", async (e) => {
-            fetch(`http://192.168.1.100:1234/WebSocket/ReconnectToEsp32Camera?guidCar=${guidCar}`,
+            fetch(`${document.location.origin}/WebSocket/ReconnectToEsp32Camera?guidCar=${guidCar}`,
                 {
                     method: 'GET'
                 });

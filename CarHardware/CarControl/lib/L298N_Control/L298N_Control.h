@@ -1,23 +1,23 @@
 #ifndef L298N_Control_H
 #define L298N_Control_H
 
-#include "Arduino.h"
+#include "L298N.h"
+#include "IDevice_Control.h"
 
-class L298N_Control
+
+class L298N_Control : public IDevice_Control
 {
 private:
-    uint8_t _pinMotorA1, _pinMotorA2, _pinMotorB1, _pinMotorB2;
+    L298N &_l298nA;
+    L298N &_l298nB;
 
-public:
-    L298N_Control(uint8_t pinMotorA1, uint8_t pinMotorA2, uint8_t pinMotorB1, uint8_t pinMotorB2);
-    void spinMotorAClockwise();
-    void spinMotorACounterClockwise();
-
-    void spinMotorBClockwise();
-    void spinMotorBCounterClockwise();
-    void stopMotorA();
-    void stopMotorB();
+public:    
+    L298N_Control(L298N &l298nA, L298N &l298nB);
+    void turnLeft() override;
+    void turnRight() override;
+    void forward() override;
+    void backward() override;
+    void brake() override;
 };
-
 
 #endif

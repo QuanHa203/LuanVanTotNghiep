@@ -1,4 +1,4 @@
-const imageContainerElement = document.getElementById("image-container");
+﻿const imageContainerElement = document.getElementById("image-container");
 const videoContainerElement = document.getElementById("video-container");
 
 const btnImageNav = document.getElementById("btn-image-nav");
@@ -17,6 +17,12 @@ const playBtn = document.querySelector('.fa-play').parentElement;
 const progressBar = document.querySelector('.progress-bar');
 const timeDisplay = document.querySelector('.time-display');
 const volumeSlider = document.querySelector('.volume-slider');
+
+const btnDownload = overlayMediaSectionElement.querySelector(".btn-download");
+const btnDelete = overlayMediaSectionElement.querySelector(".btn-delete");
+
+let mediaPath;
+let mediaBoxChild;
 
 if (mediaVideoSource) {
     playBtn.addEventListener('click', function () {
@@ -76,7 +82,10 @@ btnVideoNav.addEventListener("click", (e) => {
 
 btnCloseOverlayMedia.addEventListener("click", (e) => {
     overlayMediaSectionElement.style.display = "none";
+
 })
+
+btnDelete.addEventListener("click", deleteMedia);
 
 function showOverlayMediaSectionElement(element) {
     let src = element.src;
@@ -85,8 +94,13 @@ function showOverlayMediaSectionElement(element) {
 
     overlayMediaTitle.innerText = mediaFileName;
 
+    btnDownload.href = src;
+    mediaPath = src.split("Medias/")[1]
+    mediaBoxChild = element.closest(".media-box-child");
+
     if (element.tagName === 'IMG') {
         mediaImageSource.src = src;
+
         mediaImageSource.style.display = "block";
 
         mediaVideoSource.style.display = "none";
@@ -114,4 +128,26 @@ function setNavBtnActive(clickedBtn) {
     buttons.forEach(btn => btn.classList.remove('nav-btn-active'));
 
     clickedBtn.classList.add('nav-btn-active');
+}
+
+function deleteMedia() {
+    if (confirm(`Bạn có muốn xóa file này không?`)) {
+        fetch(`${document.location.origin}/DataStatistics/DeleteMedia`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(mediaPath)
+        })
+            .then(response => {
+                if (response.ok) {
+                    alert("Xóa thành công!");
+                    mediaBoxChild.remove();
+                }
+                else
+                    alert("Xóa thất bại")
+
+                overlayMediaSectionElement.style.display = "none";
+            })
+    }
 }

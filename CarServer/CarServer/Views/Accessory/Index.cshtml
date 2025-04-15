@@ -1,0 +1,64 @@
+﻿@model List<CarServer.Models.Accessory>
+
+@{
+    ViewData["Title"] = "Danh sách linh kiện";
+}
+
+<h1 class="fg-main">Danh sách linh kiện</h1>
+
+<p>
+    <a asp-action="Create" class="fg-blue">Tạo linh kiện mới</a>
+</p>
+<table class="table">
+    <thead class="fg-main">
+        <tr>
+            <th>
+                Mã linh kiện
+            </th>
+            <th>
+                Tên linh kiện
+            </th>
+            <th>
+                Hình ảnh
+            </th>            
+            <th></th>
+        </tr>
+    </thead>
+    <tbody style="vertical-align: middle">
+        @foreach (var item in Model)
+        {
+            <tr class="fg-main" id="accessory-id-@item.Id">
+                <td>
+                    @item.Id
+                </td>
+                <td>
+                    @item.Name
+                </td>
+                <td>
+                    <img src="@item.ImageUrl" width="60" height="60"/>
+                </td>
+                <td>
+                    <p class="fg-red m-0 text-decoration-underline cursor-pointer" onclick="deleteConfirm(`@item.Id`)">Xóa</p>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    function deleteConfirm(id) {
+        if (confirm(`Bạn có muốn xóa linh kiện có mã: "${id}"`))
+        {
+            fetch(`${document.location.origin}/Accessory/Delete?id=${id}`, {method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            document.getElementById(`accessory-id-${id}`).remove()
+                            alert("Xóa thành công");
+                        }
+                        else {
+                            alert("Xóa thất bại");
+                        }
+                    })
+        }
+    }
+</script>

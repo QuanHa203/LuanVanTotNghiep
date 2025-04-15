@@ -10,7 +10,7 @@
 .account-container {
     display: flex;
     width: 100%;
-    background: var(--primary-background-color);
+    background-color: #fff;
     padding: 32px;
     border-radius: 12px;
     overflow: hidden;

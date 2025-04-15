@@ -7,23 +7,24 @@ namespace CarServer.Controllers;
 public class DataStatisticsController : Controller
 {
     private readonly ILogger<DataStatisticsController> _logger;
-    private static readonly string mediaPath = Path.Combine(AppContext.BaseDirectory, "wwwroot", "Medias");
+    private readonly string _mediaPath;
 
     public DataStatisticsController(ILogger<DataStatisticsController> logger, IWebHostEnvironment webHostEnvironment)
     {
         _logger = logger;
+        _mediaPath = Path.Combine(webHostEnvironment.WebRootPath, "Medias");
     }
 
     public IActionResult Index()
     {
-        if (!Directory.Exists(mediaPath))
+        if (!Directory.Exists(_mediaPath))
             return View();
 
         Dictionary<string, List<string>> images = new();
         Dictionary<string, List<string>> videos = new();
         
 
-        string[] guidCarPaths = Directory.GetDirectories(mediaPath);        
+        string[] guidCarPaths = Directory.GetDirectories(_mediaPath);        
         foreach (string guidCarPath in guidCarPaths)
         {
             string guidCarFileName = Path.GetFileName(guidCarPath);
@@ -39,6 +40,20 @@ public class DataStatisticsController : Controller
         ViewData["DictionaryVideo"] = videos;
         ViewData["DictionaryImage"] = images;
         return View();
+    }
+
+
+    public IActionResult DeleteMedia([FromBody]string path)
+    {
+        path = Path.Combine(_mediaPath, path);
+        
+        if (System.IO.File.Exists(path))
+        {
+            System.IO.File.Delete(path);
+            return Ok();
+        }
+
+        return BadRequest();
     }
 
     private static void GetImagesAndVideoUrl(string path, StringBuilder sb, List<string> imageList, List<string> videoList)
