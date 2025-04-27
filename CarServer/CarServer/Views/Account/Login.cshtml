@@ -22,7 +22,7 @@
                     <label for="password">Password</label>
                     <div class="password-wrapper">
                         <input type="password" asp-for="Password" id="password" class="form-control" />
-                        <i class="toggle-password"></i>
+                        <div class="toggle-password eye-icon" onclick="showAndHidePassword(this)"></div>
                     </div>
                     <span class="fg-red" asp-validation-for="Password"></span>
                 </div>
@@ -35,3 +35,5 @@
         </div>
     </div>
 </div>
+
+<script src="~/js/account.js"></script>

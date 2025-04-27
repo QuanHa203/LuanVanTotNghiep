@@ -2,6 +2,7 @@
     ViewData["Title"] = "DataStatistics";
     var images = ViewData["DictionaryImage"] as Dictionary<string, List<string>>;
     var videos = ViewData["DictionaryVideo"] as Dictionary<string, List<string>>;
+    var carNames = ViewData["DictionaryCarName"] as Dictionary<string, string>;
 }
 
 <link rel="stylesheet" href="~/css/data-statistics.css" />
@@ -25,7 +26,7 @@
             @foreach (var key in images.Keys)
             {
                 <div class="media-box">
-                    <h3 class="media-title">@key</h3>
+                    <h3 class="media-title">@(carNames![key] ?? "")</h3>
                     @await Html.PartialAsync("_ImageBoxPartial", images[key])
                 </div>
             }
@@ -42,7 +43,7 @@
             @foreach (var key in videos.Keys)
             {
                 <div class="media-box">
-                    <h3 class="media-title">@key</h3>
+                    <h3 class="media-title">@(carNames![key] ?? "")</h3>
                     @await Html.PartialAsync("_VideoBoxPartial", videos[key])
                 </div>
             }

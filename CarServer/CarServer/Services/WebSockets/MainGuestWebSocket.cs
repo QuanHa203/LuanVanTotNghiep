@@ -23,9 +23,11 @@ namespace CarServer.Services.WebSockets
                 return;
 
             ConnectToWebSocket().Wait();
+
             _webSocketHandler.RemoveMainGuestWebSocket(this);
             RemoveCarWhenNoOneConnected();
         }
+
         public async Task SendDataToBrowserAsync(ArraySegment<byte> data, WebSocketMessageType messageType)
         {
             if (_webSocket.State == WebSocketState.Open)

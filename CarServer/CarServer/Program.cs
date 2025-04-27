@@ -5,6 +5,7 @@ using CarServer.Repositories.Implementations;
 using CarServer.Repositories.Interfaces;
 using CarServer.Services.Email;
 using CarServer.Services.WebSockets;
+
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -35,8 +36,23 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
                 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
                 {
                     options.Cookie.Name = "CarServerAuth";
-                    options.LoginPath = "/Account/Login";
-                    options.LogoutPath = "/Account/Logout";
+                    options.Cookie.HttpOnly = true;
+                    options.ExpireTimeSpan = TimeSpan.FromHours(20);
+                    options.SlidingExpiration = true;
+
+                    options.Events = new CookieAuthenticationEvents()
+                    {
+                        OnRedirectToLogin = (redirectContext) =>
+                        {
+                            redirectContext.HttpContext.Response.StatusCode = 401;
+                            return Task.CompletedTask;
+                        },
+                        OnRedirectToAccessDenied = (redirectContext) =>
+                        {
+                            redirectContext.HttpContext.Response.StatusCode = 403;
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
 builder.Services.AddAuthorization();
@@ -65,15 +81,11 @@ if (!app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot")),
-    RequestPath = ""
-});
+app.UseMiddleware<ProtectedMediasFolderMiddleware>();
+
+app.UseStaticFiles();
 
 app.UseSession();
-app.UseMiddleware<ProtectedMediasFolderMiddleware>();
 
 
 app.UseRouting();
@@ -85,6 +97,6 @@ app.UseWebSockets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Car}/{action=Index}");
+    pattern: "{controller=Home}/{action=Index}");
 
 app.Run();

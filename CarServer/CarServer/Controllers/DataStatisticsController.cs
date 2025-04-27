@@ -1,18 +1,24 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using CarServer.Models;
+using CarServer.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using System.Text;
 
 namespace CarServer.Controllers;
 
+[Authorize]
 public class DataStatisticsController : Controller
 {
     private readonly ILogger<DataStatisticsController> _logger;
+    private readonly IGenericRepository<Car> _carRepository;
     private readonly string _mediaPath;
 
-    public DataStatisticsController(ILogger<DataStatisticsController> logger, IWebHostEnvironment webHostEnvironment)
+    public DataStatisticsController(ILogger<DataStatisticsController> logger, IWebHostEnvironment webHostEnvironment, IGenericRepository<Car> carRepository)
     {
         _logger = logger;
         _mediaPath = Path.Combine(webHostEnvironment.WebRootPath, "Medias");
+        _carRepository = carRepository;
     }
 
     public IActionResult Index()
@@ -22,7 +28,8 @@ public class DataStatisticsController : Controller
 
         Dictionary<string, List<string>> images = new();
         Dictionary<string, List<string>> videos = new();
-        
+        Dictionary<string, string> carNames = new();
+
 
         string[] guidCarPaths = Directory.GetDirectories(_mediaPath);        
         foreach (string guidCarPath in guidCarPaths)
@@ -37,8 +44,13 @@ public class DataStatisticsController : Controller
             videos.Add(guidCarFileName, vidList);
         }
 
+        
+        foreach (var car in _carRepository.GetAllAsync().Result)
+            carNames[car.Id.ToString()] = car.Name;
+
         ViewData["DictionaryVideo"] = videos;
         ViewData["DictionaryImage"] = images;
+        ViewData["DictionaryCarName"] = carNames;
         return View();
     }
 
@@ -49,8 +61,15 @@ public class DataStatisticsController : Controller
         
         if (System.IO.File.Exists(path))
         {
-            System.IO.File.Delete(path);
-            return Ok();
+            try
+            {
+                System.IO.File.Delete(path);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                
+            }
         }
 
         return BadRequest();

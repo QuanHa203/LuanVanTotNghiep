@@ -30,6 +30,22 @@
     -webkit-mask-image: url('../svgs/download.svg');
 }
 
+.eye-icon {
+    width: 12px;
+    height: 12px;
+    background-color: black;
+    mask-image: url('../svgs/eye.svg');
+    -webkit-mask-image: url('../svgs/eye.svg');
+}
+
+.eye-hide-icon {
+    width: 12px;
+    height: 12px;
+    background-color: black;
+    mask-image: url('../svgs/eye_hide.svg');
+    -webkit-mask-image: url('../svgs/eye_hide.svg');
+}
+
 .head-line-off-icon {
     width: 12px;
     height: 12px;

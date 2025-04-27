@@ -2,6 +2,7 @@
 using CarServer.Models;
 using CarServer.Repositories.Interfaces;
 using CarServer.Services.WebSockets;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.WebSockets;
@@ -24,6 +25,7 @@ public class WebSocketController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> ManageCar() => View(await _carRepository.GetAllAsync());
 
     [HttpGet]
@@ -43,6 +45,7 @@ public class WebSocketController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task GuestWebSocket(Guid guidCar)
     {
         if (Guid.Empty == guidCar)
@@ -50,7 +53,7 @@ public class WebSocketController : Controller
             HttpContext.Response.StatusCode = 400;
             return;
         }
-        
+
         if (!await IsCarExistAsync(guidCar))
         {
             HttpContext.Response.StatusCode = 400;
@@ -70,6 +73,7 @@ public class WebSocketController : Controller
     }
 
     [HttpGet]
+    [Authorize]
     [EnableCors("AllowSpecificOrigin")]
     public async Task<IActionResult> ReconnectToEsp32Control(Guid guidCar)
     {
@@ -84,6 +88,7 @@ public class WebSocketController : Controller
     }
 
     [HttpGet]
+    [Authorize]
     [EnableCors("AllowSpecificOrigin")]
     public async Task<IActionResult> ReconnectToEsp32Camera(Guid guidCar)
     {
@@ -96,17 +101,6 @@ public class WebSocketController : Controller
         _pendingWebSocketRequests.AddEsp32CameraRequest(guidCar);
         return Ok();
     }
-
-    private async Task RequireCarConnectToWebSocket()
-    {
-        var cars = await _carRepository.GetAllAsync();
-        foreach (var car in cars)
-        {
-            _pendingWebSocketRequests.AddEsp32ControlRequest(car.Id);
-            _pendingWebSocketRequests.AddEsp32CameraRequest(car.Id);
-        }
-    }
-
 
     [HttpGet]
     public async Task Esp32CameraWebSocket(Guid guid)
@@ -138,5 +132,15 @@ public class WebSocketController : Controller
         }
     }
 
-    public async Task<bool> IsCarExistAsync(Guid guidCar) => await _carRepository.IsExistAsync(c => c.Id == guidCar);
+    private async Task<bool> IsCarExistAsync(Guid guidCar) => await _carRepository.IsExistAsync(c => c.Id == guidCar);
+
+    private async Task RequireCarConnectToWebSocket()
+    {
+        var cars = await _carRepository.GetAllAsync();
+        foreach (var car in cars)
+        {
+            _pendingWebSocketRequests.AddEsp32ControlRequest(car.Id);
+            _pendingWebSocketRequests.AddEsp32CameraRequest(car.Id);
+        }
+    }
 }

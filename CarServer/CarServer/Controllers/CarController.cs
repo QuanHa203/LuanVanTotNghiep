@@ -1,5 +1,6 @@
 ﻿using CarServer.Models;
 using CarServer.Repositories.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
@@ -7,6 +8,7 @@ using System.Text;
 
 namespace CarServer.Controllers;
 
+[Authorize(Roles = "Admin")]
 public class CarController : Controller
 {
     private readonly IGenericRepository<Car> _carRepository;

@@ -1,9 +1,7 @@
-﻿using CarServer.Databases;
-using CarServer.Models;
+﻿using CarServer.Models;
 using CarServer.Repositories.Interfaces;
 using CarServer.Services.WebSockets;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 namespace CarServer.Controllers

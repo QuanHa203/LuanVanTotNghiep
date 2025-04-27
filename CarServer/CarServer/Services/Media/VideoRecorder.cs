@@ -15,7 +15,7 @@ public class VideoRecorder
 
         string outputPath = InitializeVideoPath(guid, videoPath);
         _videoRecordings.TryAdd(guid, true);
-        _videoCreator = new VideoCreator(outputPath, 320, 240, 30);
+        _videoCreator = new VideoCreator(outputPath, 320, 240);
     }
 
     public void AddBuffer(byte[] buffer)

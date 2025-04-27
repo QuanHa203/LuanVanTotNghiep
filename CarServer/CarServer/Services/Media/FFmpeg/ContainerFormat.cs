@@ -1,6 +1,5 @@
 ﻿using FFmpeg.AutoGen;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using System.IO;
+
 
 namespace CarServer.Services.Media.FFmpeg
 {
@@ -11,10 +10,10 @@ namespace CarServer.Services.Media.FFmpeg
         private AVStream* _streamPtr;
         private static bool isLocateFFmpegLibrary = false;
         private string _outputFile;
-        private int _width, _height, _fps;
+        private int _width, _height;
 
 
-        public ContainerFormat(string outputFile, int width, int height, int fps)
+        public ContainerFormat(string outputFile, int width, int height)
         {
             if (!isLocateFFmpegLibrary)
             {
@@ -24,7 +23,6 @@ namespace CarServer.Services.Media.FFmpeg
 
             _width = width;
             _height = height;
-            _fps = fps;
             _outputFile = outputFile;
 
             CreateAVFormatContext();
@@ -41,7 +39,6 @@ namespace CarServer.Services.Media.FFmpeg
 
         public int GetWidth() => _width;
         public int GetHeight() => _height;
-        public int GetFps() => _fps;
 
         private void FFmpegInitialize()
         {
@@ -64,6 +61,7 @@ namespace CarServer.Services.Media.FFmpeg
 
             if (_formatContextPtr == null)
                 throw new Exception("Cannot create format context");
+
         }
 
         private void CreateAVCodecContext()
@@ -80,21 +78,24 @@ namespace CarServer.Services.Media.FFmpeg
             _codecContextPtr = ffmpeg.avcodec_alloc_context3(codecPtr);
             _codecContextPtr->width = _width;
             _codecContextPtr->height = _height;
-            _codecContextPtr->time_base = new AVRational { num = 1, den = _fps };
-            _codecContextPtr->framerate = new AVRational { num = _fps, den = 1 };
+            _codecContextPtr->codec_type = AVMediaType.AVMEDIA_TYPE_VIDEO;
+            _codecContextPtr->time_base = new AVRational { num = 1, den = 90000 };  // use large time_base to support VFR (Variable Frame Rate)
+            _codecContextPtr->framerate = new AVRational { num = 30, den = 1 };
             _codecContextPtr->pix_fmt = AVPixelFormat.AV_PIX_FMT_YUV420P;
+            _codecContextPtr->max_b_frames = 0;
+            _codecContextPtr->gop_size = 12;
+            _codecContextPtr->bit_rate = 2_000_000;
 
+            if ((_formatContextPtr->oformat->flags & ffmpeg.AVFMT_GLOBALHEADER) != 0)
+            {
+                _codecContextPtr->flags |= ffmpeg.AV_CODEC_FLAG_GLOBAL_HEADER;
+            }
             // Configuration 'preset' to encrypt faster
-            ffmpeg.av_opt_set(_codecContextPtr->priv_data, "preset", "ultrafast", 0);
-
-            // Configuration bitrate
-            AVDictionary* codecOptions = null;
-            ffmpeg.av_dict_set(&codecOptions, "tune", "zerolatency", 0);
+            ffmpeg.av_opt_set(_codecContextPtr->priv_data, "preset", "medium", 0);
 
             // Open codec
-            if (ffmpeg.avcodec_open2(_codecContextPtr, codecPtr, &codecOptions) < 0)
+            if (ffmpeg.avcodec_open2(_codecContextPtr, codecPtr, null) < 0)
                 throw new Exception("Cannot open codec H.264");
-
         }
 
         private void CreateAVStream()
@@ -104,8 +105,10 @@ namespace CarServer.Services.Media.FFmpeg
             if (_streamPtr == null)
                 throw new Exception("Cannot create AVStream");
 
+            // _streamPtr->time_base = _codecContextPtr->time_base;
+            _streamPtr->id = (int)_formatContextPtr->nb_streams - 1;
+
             ffmpeg.avcodec_parameters_from_context(_streamPtr->codecpar, _codecContextPtr);
-            _streamPtr->time_base = _codecContextPtr->time_base;
         }
 
         private void OpenOutputFile()

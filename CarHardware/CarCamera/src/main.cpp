@@ -27,8 +27,8 @@
 const char *ssid = "TestPhone";
 const char *password = "88888888";
 
-const String guid = "6bc780d5-199a-4bb9-bb30-511a25c307de";
-// const String guid = "9d6c11d7-26dd-4903-b6a5-a50c23cc3883";
+// const String guid = "6bc780d5-199a-4bb9-bb30-511a25c307de";
+const String guid = "9d6c11d7-26dd-4903-b6a5-a50c23cc3883";
 const String checkOnlineUrl = "http://192.168.53.100:1234/CarCheckOnline/CheckEsp32CameraOnline?guid=" + guid;
 const String webSocketUrl = "ws://192.168.53.100:1234/WebSocket/Esp32CameraWebSocket?guid=" + guid;
 
@@ -69,7 +69,10 @@ void loop() {}
 
 void setupCamera()
 {
+  bool isCameraInitSuccess = false;
+  uint8_t maxCameraRetries = 5;
   camera_config_t config;
+  
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
   config.pin_d0 = Y2_GPIO_NUM;
@@ -94,9 +97,27 @@ void setupCamera()
   config.jpeg_quality = 10;             // Chất lượng JPEG (0 = tốt nhất, 63 = kém nhất)
   config.fb_count = 2;                  // Sử dụng 2 buffer để tránh lag khi gửi ảnh
 
-  if (esp_camera_init(&config) != ESP_OK)
+  for (int i = 0; i < maxCameraRetries; i++)
   {
-    Serial.println("Lỗi khởi tạo camera!");
+    esp_err_t err = esp_camera_init(&config);
+    if (err == ESP_OK)
+    {
+      isCameraInitSuccess = true;
+      break;
+    }
+    else
+    {
+      Serial.printf("Camera init failed (0x%x), retry %d/%d\n", err, i + 1, maxCameraRetries);
+      esp_camera_deinit(); // Giải phóng nếu đã cấp phát bộ nhớ
+      delay(1000);         // Chờ một chút trước khi thử lại
+    }
+  }
+
+  if (!isCameraInitSuccess)
+  {
+    Serial.println("Camera init failed after retries. Restarting...");
+    delay(2000);
+    ESP.restart();
     return;
   }
 

@@ -5,12 +5,14 @@ using CarServer.Models;
 using CarServer.Services.Email;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarServer.Controllers
 {
+    [AllowAnonymous]
     public class AccountController : Controller
     {
         private readonly PasswordHasher<AppUser> _passwordHasher = new();
@@ -71,7 +73,13 @@ namespace CarServer.Controllers
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var principal = new ClaimsPrincipal(identity);
 
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+            AuthenticationProperties authenticationProperties = new AuthenticationProperties()
+            {
+                IsPersistent = true,
+                ExpiresUtc = DateTimeOffset.UtcNow.AddHours(20)
+            };
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, authenticationProperties);
             return RedirectToAction("Index", "Home");
         }
 

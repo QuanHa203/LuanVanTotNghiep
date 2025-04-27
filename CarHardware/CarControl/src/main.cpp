@@ -45,8 +45,8 @@
 const char *ssid = "TestPhone";
 const char *password = "88888888";
 
-const String guid = "6bc780d5-199a-4bb9-bb30-511a25c307de";
-// const String guid = "9d6c11d7-26dd-4903-b6a5-a50c23cc3883";
+// const String guid = "6bc780d5-199a-4bb9-bb30-511a25c307de";
+const String guid = "9d6c11d7-26dd-4903-b6a5-a50c23cc3883";
 const String checkOnlineUrl = "http://192.168.53.100:1234/CarCheckOnline/CheckEsp32ControlOnline?guid=" + guid;
 const String webSocketUrl = "ws://192.168.53.100:1234/WebSocket/Esp32ControlWebSocket?guid=" + guid;
 
@@ -59,9 +59,9 @@ websockets::WebsocketsClient webSocketClient;
 
 L298N l298nA(IN1A, IN2A, IN3A, IN4A);
 L298N l298nB(IN1B, IN2B, IN3B, IN4B);
-IDevice_Control* deviceControl = new L298N_Control(l298nA, l298nB);
+// IDevice_Control* deviceControl = new L298N_Control(l298nA, l298nB);
 
-// IDevice_Control* deviceControl = new L293D_Control(DIR_LATCH, DIR_SER, DIR_EN, DIR_CLK, PWM_0A, PWM_0B, PWM_2A, PWM_2B);
+IDevice_Control* deviceControl = new L293D_Control(DIR_LATCH, DIR_SER, DIR_EN, DIR_CLK, PWM_0A, PWM_0B, PWM_2A, PWM_2B);
 
 DHT dht(DHTPIN, DHTTYPE);
 
@@ -84,6 +84,7 @@ void ledOff();
 void setup()
 {
   Serial.begin(115200);
+  deviceControl->brake();
   dht.begin();
   setupLed();
   beginConnectToWiFi();

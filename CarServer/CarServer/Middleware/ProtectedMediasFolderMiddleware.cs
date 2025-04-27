@@ -12,14 +12,14 @@ public class ProtectedMediasFolderMiddleware : IMiddleware
         if (path == null)
             return;
 
-        //if (path.StartsWith(protectedFolder, StringComparison.OrdinalIgnoreCase))
-        //{
-        //    if (context.User.Identity == null || context.User.Identity.IsAuthenticated == false)
-        //    {
-        //        context.Response.StatusCode = 403;
-        //        return;
-        //    }
-        //}
+        if (path.StartsWith(protectedFolder, StringComparison.OrdinalIgnoreCase))
+        {
+            if (context.User.Identity == null || context.User.Identity.IsAuthenticated == false)
+            {
+                context.Response.StatusCode = 401;
+                return;
+            }
+        }
         await next(context);
     }
 }

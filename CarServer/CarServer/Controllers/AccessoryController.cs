@@ -1,5 +1,6 @@
 ﻿using CarServer.Databases;
 using CarServer.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Org.BouncyCastle.Asn1.Crmf;
@@ -8,6 +9,7 @@ using System.Text;
 
 namespace CarServer.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AccessoryController : Controller
     {
         private readonly CarServerDbContext _context;

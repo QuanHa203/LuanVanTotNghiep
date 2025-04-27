@@ -205,9 +205,13 @@ public class GuestWebSocket : IDisposable
     {
         if (_webSocket.State == WebSocketState.Open)
         {
-            await _webSocket.SendAsync(data, messageType, true, CancellationToken.None);
-            await Screenshot(data);
-            Recording(data, length);
+            try
+            {
+                await _webSocket.SendAsync(data, messageType, true, CancellationToken.None);
+                await Screenshot(data);
+                Recording(data, length);
+            }
+            catch { }
         }
     }
 
