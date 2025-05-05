@@ -19,9 +19,7 @@ namespace CarServer.Services.Media.FFmpeg
         private readonly AVPacket* _packet;
         VfrPtsGenerator _vfrPts = new VfrPtsGenerator(); // time_base.den = 90000
 
-        private int _frameIndex = 0;
         private bool _isRunning;
-        private bool _isFirstFrame = true;
 
         public VideoCreator(string outputFile, int dstWidth, int dstHeight)
         {

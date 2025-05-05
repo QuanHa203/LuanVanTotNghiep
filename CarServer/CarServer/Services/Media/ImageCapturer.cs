@@ -6,6 +6,16 @@ public class ImageCapturer
     {
         try
         {
+            int bufferLength = buffer.Length;
+
+            if (bufferLength <= 4)
+                return false;
+
+            // Start of JPEG: 0xFF 0xD8
+            if (buffer[0] != 0xFF ||
+                buffer[1] != 0xD8)
+                return false;
+
             imagePath = Path.Combine(imagePath, DateTime.Now.ToString("yyyy-MM-dd"));
             if (!Directory.Exists(imagePath))
             {

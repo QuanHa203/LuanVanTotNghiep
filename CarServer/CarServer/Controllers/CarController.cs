@@ -8,7 +8,6 @@ using System.Text;
 
 namespace CarServer.Controllers;
 
-[Authorize(Roles = "Admin")]
 public class CarController : Controller
 {
     private readonly IGenericRepository<Car> _carRepository;
@@ -31,6 +30,7 @@ public class CarController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Index()
     {
         var carServerDbContext = _carRepository.GetDbSet().Include(c => c.Esp32Camera).Include(c => c.Esp32Control);
@@ -39,6 +39,7 @@ public class CarController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create()
     {
         List<Accessory> accessories = await _accessoryRepository.GetAllAsync();
@@ -58,6 +59,7 @@ public class CarController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Edit(Guid id)
     {
         if (Guid.Empty == id)
@@ -104,6 +106,7 @@ public class CarController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Detail(Guid id)
     {
         if (Guid.Empty == id)
@@ -117,6 +120,7 @@ public class CarController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create(CarModel carModel)
     {
         if (!ModelState.IsValid)
@@ -243,6 +247,7 @@ public class CarController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Delete(Guid id)
     {
         if (id == Guid.Empty)
@@ -289,6 +294,20 @@ public class CarController : Controller
             System.IO.File.Delete(path);
     }
 
+    [HttpGet]
+    [Authorize(Roles = "Admin,Operation,Viewer")]
+    public async Task<IActionResult> GetCarById(Guid carId)
+    {
+        if (Guid.Empty == carId)
+            return NotFound();
+
+        Car? car = await _carRepository.GetByIdAsync(carId);
+        if (car == null)
+            return NotFound();
+        
+        return Ok(car);
+
+    }
 
     public class CarModel
     {

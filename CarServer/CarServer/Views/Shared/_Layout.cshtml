@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using System.Security.Claims
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -26,27 +27,44 @@
                         <li class="nav-item">
                             <a class="nav-a" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-a" asp-area="" asp-controller="Car" asp-action="Index">
-                                Quản lý các thiết bị
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-a" asp-area="" asp-controller="Accessory" asp-action="Index">
-                                Linh kiện
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-a" asp-area="" asp-controller="WebSocket" asp-action="ManageCar">
-                                Trung tâm điều khiển
-                            </a>
-                        </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-a" asp-area="Admin" asp-controller="UserManager" asp-action="Index">
+                                    Quản lý User
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-a" asp-area="" asp-controller="Car" asp-action="Index">
+                                    Quản lý các thiết bị
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-a" asp-area="" asp-controller="Accessory" asp-action="Index">
+                                    Linh kiện
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-a" asp-area="" asp-controller="WebSocket" asp-action="ManageCar">
+                                    Trung tâm điều khiển
+                                </a>
+                            </li>
+                        }
+                        else if (User.IsInRole("Operation") || User.IsInRole("Viewer"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-a" asp-area="" asp-controller="WebSocket" asp-action="ManageCar">
+                                    Trung tâm điều khiển
+                                </a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-a" asp-area="" asp-controller="DataStatistics" asp-action="Index">
                                 Thống kê dữ liệu
                             </a>
                         </li>
                     </ul>
+
                     <ul class="navbar-nav">
                         @if (Context.User.Identity == null || Context.User.Identity.IsAuthenticated == false)
                         {
@@ -60,10 +78,10 @@
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-a" href="#">Xin chào @Context.User.Identity.Name</a>
+                                <a class="nav-a" href="#">Xin chào @Context.User.Identity.Name - @User.FindFirstValue(ClaimTypes.Role)</a>
                             </li>
                             <li class="nav-item">
-                                <form asp-controller="Account" asp-action="Logout" method="post">
+                                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
                                     <button class="nav-a btn-no-bg btn-no-border" type="submit">Đăng xuất</button>
                                 </form>
                             </li>

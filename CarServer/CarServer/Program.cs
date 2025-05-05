@@ -8,7 +8,6 @@ using CarServer.Services.WebSockets;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -94,6 +93,10 @@ app.UseCors("AllowSpecificOrigin");
 app.UseAuthorization();
 app.UseWebSockets();
 
+app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller}/{action=Index}/{id?}"
+);
 
 app.MapControllerRoute(
     name: "default",

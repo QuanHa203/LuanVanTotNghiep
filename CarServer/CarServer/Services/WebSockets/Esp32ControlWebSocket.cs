@@ -7,7 +7,6 @@ namespace CarServer.Services.WebSockets;
 public class Esp32ControlWebSocket : IDisposable
 {
     private readonly WebSocket _webSocket;
-    private readonly WebSocketHandler _webSocketHandler;
     private readonly Guid _guid;
     private readonly HashSet<GuestWebSocket> _subscribedGuestWS = new();
 
@@ -19,17 +18,20 @@ public class Esp32ControlWebSocket : IDisposable
     private bool _isWebSocketOpen = true;
     private long _lastPingTime;
 
-    public Esp32ControlWebSocket(WebSocket webSocket, WebSocketHandler webSocketHandler, Guid guid)
+    public Esp32ControlWebSocket(WebSocket webSocket, Guid guid)
     {
         _webSocket = webSocket;
-        _webSocketHandler = webSocketHandler;
         _lastPingTime = stopwatch.ElapsedMilliseconds;
         _guid = guid;
+    }
 
-        if (!_webSocketHandler.AddEsp32ControlWebSocketEvent(this))
-            return;
+    public async Task ConnectToWebSocketAsync()
+    {
+        byte[] pongData = Encoding.UTF8.GetBytes("pong");
+        byte[] pingData = Encoding.UTF8.GetBytes("PingFromEsp32Control");
+        byte[] buffer = new byte[128];
 
-        Task.Run(async () =>
+        _ = Task.Run(async () =>
         {
             while (_isWebSocketOpen)
             {
@@ -39,65 +41,6 @@ public class Esp32ControlWebSocket : IDisposable
                 await Task.Delay(2000);
             }
         });
-
-        ConnectToWebSocket().Wait();
-    }
-    public void SubscribeToGuestWebSocket(GuestWebSocket guestWebSocket)
-    {
-        if (guestWebSocket.GetGuidCar() != _guid)
-            return;
-
-        if (_subscribedGuestWS.Contains(guestWebSocket))
-            return;
-
-        guestWebSocket.OnMessageReceive += async (message, length) => await SendDataToEsp32ControlAsync(message);
-    }
-
-    public void UnsubscribeFromGuestWebSocket(GuestWebSocket guestWebSocket)
-    {
-        if (guestWebSocket.GetGuidCar() != _guid)
-            return;
-
-        if (!_subscribedGuestWS.Contains(guestWebSocket))
-            return;
-
-        guestWebSocket.OnMessageReceive -= async (message, length) => await SendDataToEsp32ControlAsync(message);
-        _subscribedGuestWS.Remove(guestWebSocket);
-    }
-
-    public Guid GetGuid() => _guid;
-    
-    public void CloseWebSocket()
-    {
-        if (!_isWebSocketOpen)
-            return;
-
-        _isWebSocketOpen = false;
-
-        if (_webSocket.State == WebSocketState.Open || _webSocket.State == WebSocketState.CloseSent || _webSocket.State == WebSocketState.CloseReceived)
-        {
-            _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
-        }
-        OnClose?.Invoke();
-    }
-
-    public void Dispose()
-    {
-        _webSocketHandler.RemoveEsp32ControlWebSocketEvent(this);
-        _subscribedGuestWS.Clear();
-        OnMessageReceive = null;
-        OnClose = null;
-    }
-
-    private async Task ConnectToWebSocket()
-    {
-        // Send require Browser connect to WS
-        foreach (var mainGuestWS in _webSocketHandler._mainGuestWebSockets.Values)
-            await mainGuestWS.RequireBrowserConnectToWebSocket(_guid);
-
-        byte[] pongData = Encoding.UTF8.GetBytes("pong");
-        byte[] pingData = Encoding.UTF8.GetBytes("PingFromEsp32Control");
-        byte[] buffer = new byte[128];
 
         while (_isWebSocketOpen)
         {
@@ -135,6 +78,53 @@ public class Esp32ControlWebSocket : IDisposable
         }
     }
 
+    public Guid GetGuid() => _guid;
+
+    public void SubscribeToGuestWebSocket(GuestWebSocket guestWebSocket)
+    {
+        if (guestWebSocket.GetGuidCar() != _guid)
+            return;
+
+        if (_subscribedGuestWS.Contains(guestWebSocket))
+            return;
+
+        guestWebSocket.OnMessageReceive += async (message, length) => await SendDataToEsp32ControlAsync(message);
+    }
+
+    public void UnsubscribeFromGuestWebSocket(GuestWebSocket guestWebSocket)
+    {
+        if (guestWebSocket.GetGuidCar() != _guid)
+            return;
+
+        if (!_subscribedGuestWS.Contains(guestWebSocket))
+            return;
+
+        guestWebSocket.OnMessageReceive -= async (message, length) => await SendDataToEsp32ControlAsync(message);
+        _subscribedGuestWS.Remove(guestWebSocket);
+    }
+
+    public void CloseWebSocket()
+    {
+        if (!_isWebSocketOpen)
+            return;
+
+        _isWebSocketOpen = false;
+
+        if (_webSocket.State == WebSocketState.Open || _webSocket.State == WebSocketState.CloseSent || _webSocket.State == WebSocketState.CloseReceived)
+        {
+            _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
+        }
+        OnClose?.Invoke();
+    }
+
+    public void Dispose()
+    {
+        _subscribedGuestWS.Clear();
+        OnMessageReceive = null;
+        OnClose = null;
+    }
+
+
     private async Task SendDataToEsp32ControlAsync(ArraySegment<byte> dataToSend)
     {
         if (_webSocket.State == WebSocketState.Open)
@@ -145,5 +135,5 @@ public class Esp32ControlWebSocket : IDisposable
 
     private void SendMessageToBrowser(ArraySegment<byte> message, int length)
         => OnMessageReceive?.Invoke(message, length);
-    
+
 }

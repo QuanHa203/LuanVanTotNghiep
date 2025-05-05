@@ -144,6 +144,8 @@ function deleteMedia() {
                     alert("Xóa thành công!");
                     mediaBoxChild.remove();
                 }
+                else if (response.status == 403)
+                    alert("Bạn không có quyền xóa file này!");
                 else
                     alert("Xóa thất bại")
 

@@ -8,6 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Areas\Admin\Data\" />
+    <Folder Include="Areas\Admin\Models\" />
     <Folder Include="Databases\" />
     <Folder Include="Helpers\" />
 	  <Folder Include="wwwroot\Medias" />

@@ -1,0 +1,55 @@
+﻿@model List<CarServer.Models.AppUser>
+
+@{
+    ViewData["Title"] = "Danh sách User";
+}
+
+<h1 class="fg-main">Danh sách User</h1>
+
+<table class="table">
+    <thead class="fg-main">
+        <tr>
+            <th>Mã User</th>
+            <th>Tên đăng nhập</th>
+            <th>Email</th>
+            <th>Vai trò</th>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody style="vertical-align: middle">
+        @foreach (var item in Model)
+        {
+            <tr class="fg-main" id="user-id-@item.Id">
+                <td>@item.Id</td>
+                <td>@item.UserName</td>
+                <td>@item.Email</td>
+                <td>@item.Role.RoleName</td>
+                <td>
+                    <a class="fg-blue m-0" asp-area="Admin" asp-controller="UserManager" asp-action="Edit" asp-route-id="@item.Id">Sửa</a>
+                </td>
+                <td>
+                    <p class="fg-red m-0 text-decoration-underline cursor-pointer" onclick="deleteConfirm(`@item.Id`)">Xóa</p>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    function deleteConfirm(id) {
+        if (confirm(`Bạn có muốn xóa User có mã: "${id}"`))
+        {
+            fetch(`${document.location.origin}/Admin/UserManager/Delete?id=${id}`, {method: 'POST' })
+                    .then(response => {
+                        if (response.ok) {
+                            document.getElementById(`user-id-${id}`).remove()
+                            alert("Xóa thành công");
+                        }
+                        else {
+                            alert("Xóa thất bại");
+                        }
+                    })
+        }
+    }
+</script>

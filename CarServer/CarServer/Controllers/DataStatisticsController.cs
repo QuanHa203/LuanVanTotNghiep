@@ -54,7 +54,7 @@ public class DataStatisticsController : Controller
         return View();
     }
 
-
+    [Authorize(Roles = "Admin,Operation,Viewer")]
     public IActionResult DeleteMedia([FromBody]string path)
     {
         path = Path.Combine(_mediaPath, path);
@@ -66,7 +66,7 @@ public class DataStatisticsController : Controller
                 System.IO.File.Delete(path);
                 return Ok();
             }
-            catch (Exception ex)
+            catch 
             {
                 
             }

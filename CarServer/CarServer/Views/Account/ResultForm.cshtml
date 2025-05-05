@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Result";
+    var message = TempData["SuccessMessage"] as string;
+}
+
+<style>
+    #message-body {
+        font-family: Arial, sans-serif;
+        padding: 2rem;
+        background-color: #f8f8f8;
+    }
+
+    .message-box {
+        background-color: #e0ffe0;
+        border: 1px solid #99cc99;
+        padding: 1rem;
+        border-radius: 8px;
+        max-width: 400px;
+        margin: 2rem auto;
+        text-align: center;
+    }
+</style>
+
+<div id="message-body">
+    @if (!string.IsNullOrEmpty(message))
+    {
+        <div class="message-box">
+            <h2>Thông báo</h2>
+            <p>@message</p>
+        </div>
+
+        <script>
+            console.log("Form submitted successfully!");
+
+            // Ví dụ: Redirect sau vài giây
+            setTimeout(() => {
+                window.location.href = '/'; // hoặc '/trang-khac'
+            }, 3000);
+        </script>
+    }
+</div>

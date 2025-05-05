@@ -12,6 +12,7 @@
 
 #define DHTPIN 15 // GPIO15
 #define DHTTYPE DHT11
+// #define DHTTYPE DHT22
 
 #define LED_1 2 // GPIO2
 #define LED_2 4 // GPIO4
@@ -39,9 +40,6 @@
 #define PWM_2A 17           // D11
 #define DIR_LATCH 16        // D12
 
-// const char *ssid = "VIETTEL_Thu Quan";
-// const char *password = "hoibochau";
-
 const char *ssid = "TestPhone";
 const char *password = "88888888";
 
@@ -57,8 +55,8 @@ unsigned long timeOut = 5000;
 
 websockets::WebsocketsClient webSocketClient;
 
-L298N l298nA(IN1A, IN2A, IN3A, IN4A);
-L298N l298nB(IN1B, IN2B, IN3B, IN4B);
+// L298N l298nA(IN1A, IN2A, IN3A, IN4A);
+// L298N l298nB(IN1B, IN2B, IN3B, IN4B);
 // IDevice_Control* deviceControl = new L298N_Control(l298nA, l298nB);
 
 IDevice_Control* deviceControl = new L293D_Control(DIR_LATCH, DIR_SER, DIR_EN, DIR_CLK, PWM_0A, PWM_0B, PWM_2A, PWM_2B);

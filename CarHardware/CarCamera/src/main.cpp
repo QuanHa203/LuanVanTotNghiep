@@ -21,14 +21,11 @@
 #define HREF_GPIO_NUM 23
 #define PCLK_GPIO_NUM 22
 
-// const char *ssid = "VIETTEL_Thu Quan";
-// const char *password = "hoibochau";
-
 const char *ssid = "TestPhone";
 const char *password = "88888888";
 
-// const String guid = "6bc780d5-199a-4bb9-bb30-511a25c307de";
-const String guid = "9d6c11d7-26dd-4903-b6a5-a50c23cc3883";
+const String guid = "6bc780d5-199a-4bb9-bb30-511a25c307de";
+// const String guid = "9d6c11d7-26dd-4903-b6a5-a50c23cc3883";
 const String checkOnlineUrl = "http://192.168.53.100:1234/CarCheckOnline/CheckEsp32CameraOnline?guid=" + guid;
 const String webSocketUrl = "ws://192.168.53.100:1234/WebSocket/Esp32CameraWebSocket?guid=" + guid;
 
@@ -56,13 +53,12 @@ void onEventCallback(websockets::WebsocketsEvent event, String data);
 void setup()
 {
   Serial.begin(115200);
-  Serial.setDebugOutput(true);
 
   setupCamera();
   beginConnectToWiFi();
 
-  xTaskCreatePinnedToCore(handleWiFiDisconnectTask, "handleWiFiDisconnectTask", 2048, NULL, 1, NULL, 1);
-  xTaskCreatePinnedToCore(handleHttpRequestToServerTask, "handleHttpRequestToServerTask", 2048, NULL, 2, NULL, 1);
+  xTaskCreatePinnedToCore(handleWiFiDisconnectTask, "handleWiFiDisconnectTask", 2048, NULL, 1, NULL, 0);
+  xTaskCreatePinnedToCore(handleHttpRequestToServerTask, "handleHttpRequestToServerTask", 2048, NULL, 2, NULL, 0);
 }
 
 void loop() {}
@@ -72,7 +68,7 @@ void setupCamera()
   bool isCameraInitSuccess = false;
   uint8_t maxCameraRetries = 5;
   camera_config_t config;
-  
+
   config.ledc_channel = LEDC_CHANNEL_0;
   config.ledc_timer = LEDC_TIMER_0;
   config.pin_d0 = Y2_GPIO_NUM;
@@ -188,8 +184,8 @@ void handleWebSocketTask(void *pvParameters)
 {
   Serial.println("WebSocket connected");
   beginConnectToWebSocket();
-  xTaskCreatePinnedToCore(handleCheckWebSocketAliveTask, "handleCheckWebSocketAliveTask", 2048, NULL, 1, NULL, 1);
-  xTaskCreatePinnedToCore(handleSendVideoStreamWebSocketTask, "handleSendVideoStreamWebSocketTask", 4096, NULL, 4, NULL, 0);
+  xTaskCreatePinnedToCore(handleCheckWebSocketAliveTask, "handleCheckWebSocketAliveTask", 2048, NULL, 1, NULL, 0);
+  xTaskCreatePinnedToCore(handleSendVideoStreamWebSocketTask, "handleSendVideoStreamWebSocketTask", 8192, NULL, 5, NULL, 1);
 
   while (isWebSocketConnected)
   {
@@ -233,21 +229,24 @@ void handleSendVideoStreamWebSocketTask(void *pvParameters)
       continue;
     }
 
-    if (!webSocketClient.sendBinary((char *)fb->buf, fb->len))
-      Serial.println("Send image error!");
-
-    if (millis() - lastTimePing >= timeToSendPing)
+    if (isWebSocketConnected && webSocketClient.available())
     {
-      vTaskDelay(10 / portTICK_PERIOD_MS);
-      lastTimePing = millis();
-      if (!webSocketClient.sendBinary("ping"))
-        Serial.println("Send ping error!");
+      if (!webSocketClient.sendBinary((char *)fb->buf, fb->len))
+        Serial.println("Send image error!");
+
+      if (millis() - lastTimePing >= timeToSendPing)
+      {
+        vTaskDelay(10 / portTICK_PERIOD_MS);
+        lastTimePing = millis();
+        if (!webSocketClient.sendBinary("ping", 4))
+          Serial.println("Send ping error!");
+      }
     }
 
     esp_camera_fb_return(fb);
     vTaskDelay(30 / portTICK_PERIOD_MS);
-    Serial.printf("Free Internal Heap: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
-    Serial.printf("Stack remaining in Handle Send Video Stream WebSocket Task Task: %d bytes \n\n", uxTaskGetStackHighWaterMark(NULL));
+    // Serial.printf("Free Internal Heap: %d bytes\n", heap_caps_get_free_size(MALLOC_CAP_INTERNAL));
+    // Serial.printf("Stack remaining in Handle Send Video Stream WebSocket Task Task: %d bytes \n\n", uxTaskGetStackHighWaterMark(NULL));
   }
 
   vTaskDelete(NULL);

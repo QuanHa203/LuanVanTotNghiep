@@ -9,7 +9,6 @@ namespace CarServer.Services.WebSockets;
 public class GuestWebSocket : IDisposable
 {
     private readonly WebSocket _webSocket;
-    private readonly WebSocketHandler _webSocketHandler;
     private readonly Guid _guidCar;
     private readonly HashSet<Esp32CameraWebSocket> _subscribedEsp32CameraWS = new();
     private readonly HashSet<Esp32ControlWebSocket> _subscribedEsp32ControlWS = new();
@@ -30,33 +29,16 @@ public class GuestWebSocket : IDisposable
     private readonly string _imagePath;
     private readonly string _videoPath;
 
-    public GuestWebSocket(WebSocket webSocket, WebSocketHandler webSocketHandler, Guid guidCar, IWebHostEnvironment webHostEnvironment)
+    public GuestWebSocket(WebSocket webSocket, Guid guidCar, IWebHostEnvironment webHostEnvironment)
     {
         _webSocket = webSocket;
-        _webSocketHandler = webSocketHandler;
         _guidCar = guidCar;
 
         _isWebSocketOpen = true;
         _lastPingTime = stopwatch.ElapsedMilliseconds;
 
         _imagePath = Path.Combine(webHostEnvironment.WebRootPath, "Medias", guidCar.ToString(), "Screenshots");
-        _videoPath = Path.Combine(webHostEnvironment.WebRootPath, "Medias", guidCar.ToString(), "Recordings");
-
-        if (!_webSocketHandler.AddGuestWebSocketEvent(this))
-            return;
-
-        Task.Run(async () =>
-        {
-            while (_isWebSocketOpen)
-            {
-                if (stopwatch.ElapsedMilliseconds - _lastPingTime > _webSocketTimeOut)
-                    CloseWebSocket();
-
-                await Task.Delay(3000);
-            }
-        });
-
-        ConnectToWebSocket().Wait();
+        _videoPath = Path.Combine(webHostEnvironment.WebRootPath, "Medias", guidCar.ToString(), "Recordings");        
     }
 
     public void SubscribeToEsp32ControlWebSocket(Esp32ControlWebSocket esp32ControlWebSocket)
@@ -126,34 +108,31 @@ public class GuestWebSocket : IDisposable
         _subscribedEsp32CameraWS.Remove(esp32CameraWebSocket);
     }
 
-    public void CloseWebSocket()
-    {
-        if (!_isWebSocketOpen)
-            return;
-
-        _isWebSocketOpen = false;
-
-        if (_webSocket.State == WebSocketState.Open || _webSocket.State == WebSocketState.CloseSent || _webSocket.State == WebSocketState.CloseReceived)
-        {
-            _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
-        }
-        OnClose?.Invoke();
-    }
-
     public Guid GetGuidCar() => _guidCar;
 
     public void Dispose()
     {
-        _webSocketHandler.RemoveGuestWebSocketEvent(this);
         _subscribedEsp32ControlWS.Clear();
         _subscribedEsp32CameraWS.Clear();
         OnMessageReceive = null;
         OnClose = null;
     }
 
-    private async Task ConnectToWebSocket()
+    public async Task ConnectToWebSocketAsync()
     {
         byte[] buffer = new byte[128];
+
+        _ = Task.Run(async () =>
+        {
+            while (_isWebSocketOpen)
+            {
+                if (stopwatch.ElapsedMilliseconds - _lastPingTime > _webSocketTimeOut)
+                    CloseWebSocket();
+
+                await Task.Delay(3000);
+            }
+        });
+
         while (_isWebSocketOpen)
         {
             WebSocketReceiveResult result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
@@ -199,6 +178,20 @@ public class GuestWebSocket : IDisposable
                 OnMessageReceive?.Invoke(messageReceived, result.Count);
             }
         }
+    }
+    
+    private void CloseWebSocket()
+    {
+        if (!_isWebSocketOpen)
+            return;
+
+        _isWebSocketOpen = false;
+
+        if (_webSocket.State == WebSocketState.Open || _webSocket.State == WebSocketState.CloseSent || _webSocket.State == WebSocketState.CloseReceived)
+        {
+            _webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, null, CancellationToken.None);
+        }
+        OnClose?.Invoke();
     }
 
     private async Task SendDataToBrowserAsync(ArraySegment<byte> data, int length, WebSocketMessageType messageType)

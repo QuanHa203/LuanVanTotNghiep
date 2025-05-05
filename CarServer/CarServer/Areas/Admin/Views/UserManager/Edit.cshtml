@@ -1,0 +1,72 @@
+﻿@model CarServer.Areas.Admin.Controllers.UserManagerController.AppUserModel
+
+@{
+    ViewData["Title"] = "Sửa User";
+    var roles = ViewData["Roles"] as List<CarServer.Models.Role>;
+    if (roles == null)
+    {
+        Context.Response.StatusCode = 404;
+        return;
+    }
+}
+<h1 class="fg-main">Chỉnh sửa</h1>
+
+<hr />
+<div class="row fg-main">
+    <div class="col-md-4">
+        <form asp-area="Admin" asp-controller="UserManager" asp-action="Edit" method="post">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="form-group">
+                <label class="form-label">Tên đăng nhập</label>
+                <input class="form-control bg-main fg-second" asp-for="@Model.UserName" value="@(Model.UserName ?? "")" />
+                <span class="fg-red" asp-validation-for="UserName"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input class="form-control bg-main fg-second" asp-for="@Model.Email" value="@(Model.Email ?? "")" />
+                <span class="fg-red" asp-validation-for="Email"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Vai trò</label>
+                <select class="form-select" asp-for="@Model.IdRole">
+                    @foreach (var role in roles)
+                    {
+                        if (role.Id == Model.IdRole)
+                        {
+                            <option class="form-options" value="@role.Id" selected>@role.RoleName</option>
+                        }
+                        else
+                        {
+                            <option class="form-options" value="@role.Id">@role.RoleName</option>
+                        }
+                    }
+                </select>
+                <span class="fg-red" asp-validation-for="@Model.IdRole"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Reset password (nếu có)</label>
+                <input class="form-control bg-main fg-second" asp-for="@Model.PasswordReset" value="@(Model.PasswordReset ?? "")" />
+                <span class="fg-red" asp-validation-for="PasswordReset"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Nhập lại reset password (nếu có)</label>
+                <input class="form-control bg-main fg-second" asp-for="@Model.ReEnterPasswordReset" value="@(Model.ReEnterPasswordReset ?? "")" />
+                <span class="fg-red" asp-validation-for="ReEnterPasswordReset"></span>
+            </div>
+
+            <div class="form-group mt-2">
+                <input type="submit" value="Chỉnh sửa" class="btn-padding btn-no-border btn-border-radius fg-white bg-blue" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Quay lại danh sách xe</a>
+</div>
+
