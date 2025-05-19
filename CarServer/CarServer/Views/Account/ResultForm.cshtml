@@ -7,12 +7,12 @@
     #message-body {
         font-family: Arial, sans-serif;
         padding: 2rem;
-        background-color: #f8f8f8;
     }
 
     .message-box {
-        background-color: #e0ffe0;
-        border: 1px solid #99cc99;
+        background-color: var(--primary-background-color);
+        color: var(--secondary-foreground-color);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
         padding: 1rem;
         border-radius: 8px;
         max-width: 400px;
@@ -25,16 +25,13 @@
     @if (!string.IsNullOrEmpty(message))
     {
         <div class="message-box">
-            <h2>Thông báo</h2>
+            <h2><strong>Thông báo</strong></h2>
             <p>@message</p>
         </div>
 
         <script>
-            console.log("Form submitted successfully!");
-
-            // Ví dụ: Redirect sau vài giây
             setTimeout(() => {
-                window.location.href = '/'; // hoặc '/trang-khac'
+                window.location.href = '/';
             }, 3000);
         </script>
     }

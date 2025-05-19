@@ -49,6 +49,11 @@
                                     Trung tâm điều khiển
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-a" asp-area="" asp-controller="DataStatistics" asp-action="Index">
+                                    Thống kê dữ liệu
+                                </a>
+                            </li>
                         }
                         else if (User.IsInRole("Operation") || User.IsInRole("Viewer"))
                         {
@@ -57,12 +62,13 @@
                                     Trung tâm điều khiển
                                 </a>
                             </li>
-                        }
-                        <li class="nav-item">
-                            <a class="nav-a" asp-area="" asp-controller="DataStatistics" asp-action="Index">
-                                Thống kê dữ liệu
-                            </a>
-                        </li>
+
+                            <li class="nav-item">
+                                <a class="nav-a" asp-area="" asp-controller="DataStatistics" asp-action="Index">
+                                    Thống kê dữ liệu
+                                </a>
+                            </li>
+                        }                        
                     </ul>
 
                     <ul class="navbar-nav">
